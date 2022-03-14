@@ -31,7 +31,7 @@ const AuthManager = {
             cookies.set('token', token, { expires: 1 });
         })
         .catch((error) => {
-            console.log(error.response.data.errors);
+            console.log(error);
         });
     },
 
@@ -56,7 +56,7 @@ const AuthManager = {
             return {userId: userId, userName: userName, userBalance: userBalance};
 
         } catch (error) {
-            console.log(error.response.data.errors);
+            console.log(error);
         }
     },
 
@@ -77,7 +77,7 @@ const AuthManager = {
                 cookies.remove('token');
             }
         } catch (error) {
-            console.log(error.response.data.errors);
+            console.log(error);
         }
     }
 }

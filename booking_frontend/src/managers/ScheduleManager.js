@@ -19,13 +19,24 @@ const getToken = () => {
     }
 };
 
+const extractComponents = (date) => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    return { day, month, year, hour, minute };
+};
+
 const ScheduleManager = {
 
     async getForDate(date) {
+        console.log("GET");
         const day = date.getDate();
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         try {
+            console.log(`for-date/${year}-${month}-${day}`);
             const response = await client.get(`/for-date/${year}-${month}-${day}`, {
                 headers: {
                     'Authorization': 'Bearer ' + getToken(),
@@ -41,23 +52,20 @@ const ScheduleManager = {
             }
 
         } catch (error) {
-            console.log(error.response.data.errors);
+            console.log(error);
         }
     },
 
     async save(sDate, eDate, slot, userId) {
-        /*const day = date.getDate();
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const hour = date.getHours();
-        const minute = date.getMinutes();*/
+        const sComps = extractComponents(sDate);
+        const eComps = extractComponents(eDate);
 
         const json = JSON.stringify({
             user: userId,
             slot: slot,
             timezone: "UTC",
-            start: "2014-04-02 08:49:43",
-            end: "2014-04-02 08:49:43"
+            start: `${sComps.year}-${sComps.month}-${sComps.day} ${sComps.hour}:${sComps.minute}:00`,
+            end: `${eComps.year}-${eComps.month}-${eComps.day} ${eComps.hour}:${eComps.minute}:00`
         });
 
         try {

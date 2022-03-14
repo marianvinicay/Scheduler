@@ -19,8 +19,6 @@ import ScheduleManager from '../../managers/ScheduleManager';
 moment.locale('sk');
 const localizer = momentLocalizer(moment);
 
-const cEvents = [];
-
 const resourceMap = [
   { resourceId: 1, resourceTitle: 'Slot 1' },
   { resourceId: 2, resourceTitle: 'Slot 2' },
@@ -52,19 +50,20 @@ function Dashboard() {
 
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
-  const [slot, setSlot] = useState(1);
-  const [events, setEvents] = useState(cEvents);
+  const [slot, setSlot] = useState(2);
+  const [events, setEvents] = useState([]);//ScheduleManager.getForDate(date));
 
   const addEvent = () => {
-    let startDate = date; 
+    let startDate = new Date(date.valueOf()); 
     startDate.setHours(time[0].split(':')[0]);
     startDate.setMinutes(time[0].split(':')[1]);
 
-    let endDate = new date;
+    let endDate = new Date(date.valueOf());
     endDate.setHours(time[1].split(':')[0]);
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
+      ScheduleManager.save(startDate, endDate, slot, 6);
       const newEvent = {
         id: events.length,
         title: 'Booked',
@@ -72,6 +71,7 @@ function Dashboard() {
         end: endDate,
         resourceId: slot,
       };
+      console.log(newEvent);
       setEvents((oldEvents) => [...oldEvents, newEvent]);
     }
   };
@@ -82,8 +82,6 @@ function Dashboard() {
         	navigate('/', { replace: true });
       	});
   };
-
-  ScheduleManager.getForDate(date)
 
   return (
     <div className="Dashboard">
@@ -98,15 +96,15 @@ function Dashboard() {
 
       <FormControl fullWidth>
         <InputLabel variant="standard" htmlFor="uncontrolled-native">
-          Age
+          Slot
         </InputLabel>
         <NativeSelect
-          defaultValue={1}
+          defaultValue={slot}
           inputProps={{
             name: 'slot',
             id: 'uncontrolled-native',
           }}
-          onChange={(p) => setSlot(p.target.value)}
+          onChange={(p) => setSlot(parseInt(p.target.value))}
         >
           <option value={1}>Slot 1</option>
           <option value={2}>Slot 2</option>
@@ -125,10 +123,6 @@ function Dashboard() {
       />
 
       <Button variant="contained" onClick={addEvent}>
-        Slot
-      </Button>
-
-      <Button variant="contained" onClick={addEvent}>
         Rezervovať
       </Button>
 
@@ -144,7 +138,10 @@ function Dashboard() {
       toolbar={true}
       defaultDate={date}
       date={date}
-      onNavigate={(date) => { setDate(date) }}
+      onNavigate={(date) => { 
+        setDate(date);
+        //ScheduleManager.getForDate(date);
+      }}
       resources={resourceMap}
       resourceIdAccessor="resourceId"
       resourceTitleAccessor="resourceTitle"
