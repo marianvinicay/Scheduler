@@ -51,7 +51,11 @@ function Dashboard() {
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(2);
-  const [events, setEvents] = useState([]);//ScheduleManager.getForDate(date));
+  const [events, setEvents] = useState([]);
+
+  //ScheduleManager.getForDate(date).then((events) => {
+  //  setEvents(events);
+  //});
 
   const addEvent = () => {
     let startDate = new Date(date.valueOf()); 
@@ -71,7 +75,6 @@ function Dashboard() {
         end: endDate,
         resourceId: slot,
       };
-      console.log(newEvent);
       setEvents((oldEvents) => [...oldEvents, newEvent]);
     }
   };
@@ -90,7 +93,12 @@ function Dashboard() {
       </Button>
 
       <Calendar
-        onChange={setDate}
+        onChange={(date) => {
+          setDate(date);
+          ScheduleManager.getForDate(date).then((events) => {
+            setEvents(events);
+          });
+        }}
         value={date}
       />
 
@@ -138,10 +146,7 @@ function Dashboard() {
       toolbar={true}
       defaultDate={date}
       date={date}
-      onNavigate={(date) => { 
-        setDate(date);
-        //ScheduleManager.getForDate(date);
-      }}
+      onNavigate={(date) => setDate(date)}
       resources={resourceMap}
       resourceIdAccessor="resourceId"
       resourceTitleAccessor="resourceTitle"

@@ -28,15 +28,30 @@ const extractComponents = (date) => {
     return { day, month, year, hour, minute };
 };
 
+const sqlDateToJSDate = (sqlDateString) => {
+    const dateParts = sqlDateString.split("-");
+    const year = dateParts[0];
+    const month = dateParts[1] - 1;
+
+    const tail = dateParts[2].split(" ");
+    const day = tail[0];
+    
+    const timeParts = tail[1].split(":");
+    const hour = timeParts[0];
+    const minutes = timeParts[1];
+
+    const jsDate = new Date(year, month, day, hour, minutes, 0);
+    console.log(jsDate);
+    return jsDate;
+};
+
 const ScheduleManager = {
 
     async getForDate(date) {
-        console.log("GET");
         const day = date.getDate();
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         try {
-            console.log(`for-date/${year}-${month}-${day}`);
             const response = await client.get(`/for-date/${year}-${month}-${day}`, {
                 headers: {
                     'Authorization': 'Bearer ' + getToken(),
@@ -46,10 +61,24 @@ const ScheduleManager = {
             });
 
             const json = response.data;
+            var events = [];
+            console.log("GET");
             for(var i = 0; i < json.length; i++) {
                 const obj = json[i];
                 console.log(obj);
+                const sDate = sqlDateToJSDate(obj.start);
+                const eDate = sqlDateToJSDate(obj.end);
+
+                const event = {
+                    id: obj.id,
+                    title: 'Booked',
+                    start: sDate,
+                    end: eDate,
+                    resourceId: obj.slot,
+                };
+                events.push(event);
             }
+            return events;
 
         } catch (error) {
             console.log(error);
