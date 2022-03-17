@@ -32,9 +32,10 @@ class AuthController extends Controller
 
     protected function create(array $data)
     {
+        $email = $data['email'];
         $user = User::create([
             'name' => $data['name'],
-            'email' => $data['email'],
+            'email' => $email,
             'password' => bcrypt($data['password']),
             'balance' => $data['balance'] ?? 0.0,
         ]);
@@ -71,7 +72,7 @@ class AuthController extends Controller
             $user->tokens()->delete();
             return response()->json(['message' => 'User logged out.'], 200);
         }
-        
+
         return response()->json(['message' => 'Nothing'], 400);
     }
 }
