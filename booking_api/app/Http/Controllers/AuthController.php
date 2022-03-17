@@ -10,6 +10,17 @@ use Validator;
 
 class AuthController extends Controller
 {
+    protected function packUserWithToken(User $user)
+    {
+        return [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'balance' => $user->balance,
+            'token' => $user->createToken('web')->plainTextToken,
+        ];
+    }
+
     protected function validator(array $data) 
     {
         return Validator::make($data, [
@@ -19,20 +30,13 @@ class AuthController extends Controller
         ]);
     }
 
-    protected function registered(Request $request, $user) 
-    {
-        $user->generateToken();
-
-        return response()->json(['data' => $user->toArray()], 201);
-    }
-
     protected function create(array $data)
     {
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            //'balance' => 0.0,
             'password' => bcrypt($data['password']),
+            'balance' => $data['balance'] ?? 0.0,
         ]);
 
         return $user; 
@@ -45,54 +49,29 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        $user->generateToken();
-
-        $success["id"] = $user->id;
-        $success["name"] = $user->name;
-        $success["email"] = $user->email;
-        $success["token"] = $user->api_token;
-        $success["token_created_at"] = $user->api_token_created_at;
-
-        return response()->json($success, 201);;
+        return response()->json($this->packUserWithToken($user), 201);;
     }
 
     public function login(Request $request)
     {
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) { 
             $auth = Auth::user(); 
-            $auth->generateToken(); 
-            $success['name'] =  $auth->name;
-   
-            return response()->json($success, 201);
-            
+            return response()->json($this->packUserWithToken($auth), 202);
+
         } else { 
-            return response()->json("", 401);
+            return response()->json(['error' => 'Unauthorized'], 401);
         } 
-/*
-        $this->validateLogin($request);
-        
-        if ($this->attemptLogin($request)) {
-            $user = $this->guard()->user();
-            $user->generateToken();
-
-            return response()->json([
-                'data' => $user->toArray(),
-            ]);
-        }
-
-        return $this->sendFailedLoginResponse($request);*/
     }
 
     public function logout(Request $request)
     {
-        $user = Auth::guard('api')->user();
+        $user = Auth::user();
 
         if ($user) {
-            $user->api_token = null;
-            $user->api_token_created_at = null;
-            $user->save();
+            $user->tokens()->delete();
+            return response()->json(['message' => 'User logged out.'], 200);
         }
-
-        return response()->json(['data' => 'User logged out.'], 200);
+        
+        return response()->json(['message' => 'Nothing'], 400);
     }
 }

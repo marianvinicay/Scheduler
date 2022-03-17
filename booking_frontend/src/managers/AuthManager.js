@@ -27,7 +27,7 @@ const AuthManager = {
             }
         })
         .then((response) => {
-            const token = response.data.data.api_token;
+            const token = response.data.token;
             cookies.set('token', token, { expires: 1 });
         })
         .catch((error) => {
@@ -47,12 +47,12 @@ const AuthManager = {
                     'Accept': 'application/json'
                 }
             });
-            const token = response.data.data.api_token;
+            const token = response.data.token;
             cookies.set('token', token, { expires: 1 });
             
-            const userId = response.data.data.id;
-            const userName = response.data.data.name;
-            const userBalance = response.data.data.balance;
+            const userId = response.data.id;
+            const userName = response.data.name;
+            const userBalance = response.data.balance;
             return {userId: userId, userName: userName, userBalance: userBalance};
 
         } catch (error) {
