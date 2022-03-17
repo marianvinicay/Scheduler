@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\VerifyEmailController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -14,9 +16,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect(Config::get('app.url') . ':3000');
 });
+
+Route::get('/verif-notice', function () {
+    return redirect(Config::get('app.url') . ':3000/email-not-verified');
+})->name('verification.notice');
 
 Route::get('/login', function () {
     return redirect(Config::get('app.url') . ':3000/login');
 })->name('login');
+
+Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, "verify"])->name('verification.verify');
+Route::get('/email/verify/send/{id}', [VerifyEmailController::class, "send"])->name('verification.send');
+Route::post('/email/verify/send', [VerifyEmailController::class, "resend"]);

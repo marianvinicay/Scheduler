@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\VerifyEmailController;
+use App\Http\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,14 +21,18 @@ use App\Http\Controllers\VerifyEmailController;
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 
-Route::get('/email/verify/{id}/{hash}', [VerifyEmailController::class, "verify"])->name('verification.verify');
-Route::get('/email/verify/send/{id}', [VerifyEmailController::class, "send"])->name('verification.send');
-Route::post('/email/verify/send', [VerifyEmailController::class, "resend"]);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', function (Request $request) {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
+    Route::get('/me', function (Request $request) {
         return $request->user();
     });
 
+    Route::get('reservation/{id}', [ReservationController::class, 'get']);
+    Route::get('reservation/for-user/{uid}', [ReservationController::class, 'getForUser']);
+    Route::get('reservation/for-date/{date}', [ReservationController::class, 'getForDate']);
+    Route::post('reservation', [ReservationController::class, 'save']);
+    Route::delete('reservation/{id}', [ReservationController::class, 'delete']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
     Route::delete('auth/logout', [AuthController::class, 'logout']);
 });
