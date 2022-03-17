@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect} from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 
 import Button from '@mui/material/Button';
 import { FormControl, InputLabel, NativeSelect } from '@mui/material';
@@ -47,15 +47,18 @@ const checkEvents = (events, startDate, endDate) => {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
-  const [slot, setSlot] = useState(2);
+  const [slot, setSlot] = useState(1);
   const [events, setEvents] = useState([]);
 
-  //ScheduleManager.getForDate(date).then((events) => {
-  //  setEvents(events);
-  //});
+  useEffect(() => {
+    ScheduleManager.getForDate(date).then((events) => {
+      setEvents(events);
+    });
+  }, [date]);
 
   const addEvent = () => {
     let startDate = new Date(date.valueOf()); 
@@ -67,15 +70,17 @@ function Dashboard() {
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
-      ScheduleManager.save(startDate, endDate, slot, 6);
-      const newEvent = {
-        id: events.length,
-        title: 'Booked',
-        start: startDate,
-        end: endDate,
-        resourceId: slot,
-      };
-      setEvents((oldEvents) => [...oldEvents, newEvent]);
+      ScheduleManager.save(startDate, endDate, slot, location.state.userId)
+        .then((newEvent) => {
+          const calEvent = {
+            id: newEvent.id,
+            title: 'Booked',
+            start: startDate,
+            end: endDate,
+            resourceId: slot,
+          };
+          setEvents((oldEvents) => [...oldEvents, calEvent]);
+        });
     }
   };
 
@@ -93,12 +98,7 @@ function Dashboard() {
       </Button>
 
       <Calendar
-        onChange={(date) => {
-          setDate(date);
-          ScheduleManager.getForDate(date).then((events) => {
-            setEvents(events);
-          });
-        }}
+        onChange={(date) => setDate(date)}
         value={date}
       />
 

@@ -47,13 +47,13 @@ const AuthManager = {
                     'Accept': 'application/json'
                 }
             });
-            const token = response.data.token;
-            cookies.set('token', token, { expires: 1 });
+            const r_data = response.data;
+            cookies.set('token', r_data.token, { expires: 1 });
             
-            const userId = response.data.id;
-            const userName = response.data.name;
-            const userBalance = response.data.balance;
-            return {userId: userId, userName: userName, userBalance: userBalance};
+            const userId = r_data.id;
+            const userName = r_data.name;
+            const userBalance = r_data.balance;
+            return { userId: userId, userName: userName, userBalance: userBalance };
 
         } catch (error) {
             console.log(error);
