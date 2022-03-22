@@ -24,7 +24,7 @@ Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    Route::get('user', [UserController::class, 'getCurrent']);
+    Route::get('auth/user', [UserController::class, 'getCurrent']);
     Route::get('user/reservations', [ReservationController::class, 'getForCurrentUser']);
 
     Route::get('user/{uid}', [UserController::class, 'get'])

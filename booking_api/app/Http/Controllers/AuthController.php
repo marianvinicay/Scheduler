@@ -12,16 +12,23 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    protected function packUserWithToken(User $user, $name, $policy)
+    protected function packUser(User $user)
     {
-        $newToken = $user->createToken($name, [$policy]);
-        $userData = [
+        return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'balance' => $user->balance,
-            'token' => $newToken->plainTextToken,
         ];
+    }
+
+    protected function packUserWithToken(User $user, $name, $policy)
+    {
+        $newToken = $user->createToken($name, [$policy]);
+        
+        $userData = $this->packUser($user);
+        $userData['token'] = $newToken->plainTextToken;
+
         $policy = $newToken->accessToken->abilities;
 
         return [
@@ -59,7 +66,7 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        return response()->json($this->packUserWithToken($user, 'web_r', 'user'), 201);;
+        return response()->json($this->packUser($user), 201);;
     }
 
     public function login(Request $request)

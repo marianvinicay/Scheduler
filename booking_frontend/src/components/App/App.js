@@ -1,29 +1,15 @@
-import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
-import Cookies from 'js-cookie';
-//import useToken from './components/App/useToken';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import LandingPage from '../Auth/LandingPage';
 import Login from '../Auth/Login';
 import Register from '../Auth/Register';
-import Dashboard from '../Dashboard/Dashboard';
+import Guard from '../Auth/Guard';
+import UserPanel from '../User/Panel';
+import AdminPanel from '../Admin/Panel';
+import AdminUsers from '../Admin/Users';
+import AdminReservations from '../Admin/Reservations';
 
 import './App.css';
-
-function RequireAuth() {
-  let location = useLocation();
-
-  if (!Cookies.get('token')) {
-    return <Navigate to="/login" state={{ from: location }} />;
-  }
-
-  return <Outlet />;
-}
-
-function LandingPage() {
-  if (!Cookies.get('token')) {
-    return <Navigate to="/login" />;
-  }
-  return <Navigate to="/dashboard" />;
-}
 
 function App() {
   return (
@@ -33,9 +19,10 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route element={<RequireAuth />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-            </Route>
+            <Route path="/dashboard" element={<Guard policy='user' content={<UserPanel />} />} />
+            <Route path="/admin" element={<Guard policy='admin' content={<AdminPanel />} />} />
+            <Route path="/admin/users" element={<Guard policy='admin' content={<AdminUsers />} />} />
+            <Route path="/admin/reservations" element={<Guard policy='admin' content={<AdminReservations />} />} />
           </Routes>
         </BrowserRouter>
     </div>

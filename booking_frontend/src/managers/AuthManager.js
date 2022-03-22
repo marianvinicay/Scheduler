@@ -26,8 +26,8 @@ const AuthManager = {
 
         client.post("/register", json)
             .then((response) => {
-                const token = response.data.token;
-                cookies.set('token', token, { expires: 1 });
+                const user = response.data.user;
+                // TODO: redirect to login page
             })
             .catch((error) => {
                 console.log(error);
@@ -41,16 +41,43 @@ const AuthManager = {
         });
         try {
             const response = await client.post("/login", json);
-            const r_data = response.data;
-            cookies.set('token', r_data.token, { expires: 1 });
+            console.log(response);
+            const user = response.data.user;
+            const policy = response.data.policy;
+            cookies.set('token', user.token, { expires: 1 });
             
-            const userId = r_data.id;
-            const userName = r_data.name;
-            const userBalance = r_data.balance;
-            return { userId: userId, userName: userName, userBalance: userBalance };
+            const userId = user.id;
+            const userName = user.name;
+            const userBalance = user.balance;
+            return { userId: userId, userName: userName, userBalance: userBalance, userPolicy: policy };
 
         } catch (error) {
             console.log(error);
+        }
+    },
+
+    async currentUser() {
+        const token = cookies.get('token');
+        if (!token) {
+            return null;
+        }
+        try {
+            const response = await client.get("/user", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const user = response.data.user;
+            const policy = response.data.policy;
+            
+            const userId = user.id;
+            const userName = user.name;
+            const userBalance = user.balance;
+            return { userId: userId, userName: userName, userBalance: userBalance, userPolicy: policy };
+
+        } catch (error) {
+            console.log(error);
+            return null;
         }
     },
 

@@ -1,8 +1,8 @@
 import { useState, useEffect} from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 
-import Button from '@mui/material/Button';
-import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect } from '@mui/material';
+import Cookies from 'js-cookie';
+import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
 
 import Calendar from 'react-calendar';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
@@ -45,14 +45,49 @@ const checkEvents = (events, startDate, endDate) => {
   return eventsOnDate.length === 0;
 };
 
-function Dashboard() {
+function Panel() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [authorised, setAuthorised] = useState(false);
+
+  const [userName, setUserName] = useState('');
+  const [userBalance, setUserBalance] = useState(0);
 
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(1);
   const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    if (!location.state) {
+      const cookie = Cookies.get('token');
+      if (!cookie) {
+        navigate("/login", { replace: true });
+      } else {
+        AuthManager.currentUser()
+          .then((user) => {
+            if (user.userPolicy.includes('admin')) {
+              navigate("/admin", { replace: true, state: user });
+            } else {
+              navigate('/dashboard', { replace: true, state: user });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+            navigate("/login", { replace: true });
+          });
+      }
+    } else {
+      if (!location.state.userPolicy.includes('user')) {
+        navigate("/admin", { replace: true });
+      } else {
+        setAuthorised(true);
+        setUserName(location.state.userName);
+        setUserBalance(location.state.userBalance);
+      }
+    }
+  }, [location]);
 
   useEffect(() => {
     ScheduleManager.getForDate(date).then((events) => {
@@ -91,12 +126,19 @@ function Dashboard() {
       	});
   };
 
+  if (!authorised) {
+    return (
+      <Container>
+      </Container>
+    )
+  }
+
   return (
     <Container maxWidth="lg" className="Dashboard">
       <Stack direction="column" spacing={3}>
         <Grid container spacing={3}>
           <Grid item xs={9}>
-            <p>{location.state.userName}   |   Kredit: {location.state.userBalance} €</p>
+            <p>{userName}   |   Kredit: {userBalance} €</p>
           </Grid>
           <Grid item xs={3}>
             <Button variant="contained" onClick={logout}>
@@ -177,4 +219,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Panel;
