@@ -12,15 +12,21 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    protected function packUserWithToken(User $user, $policy)
+    protected function packUserWithToken(User $user, $name, $policy)
     {
-        return [
+        $newToken = $user->createToken($name, [$policy]);
+        $userData = [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'balance' => $user->balance,
+            'token' => $newToken->plainTextToken,
+        ];
+        $policy = $newToken->accessToken->abilities;
+
+        return [
+            'user' => $userData,
             'policy' => $policy,
-            'token' => $user->createToken('web', [$policy])->plainTextToken,
         ];
     }
 
@@ -53,7 +59,7 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        return response()->json($this->packUserWithToken($user, "user"), 201);;
+        return response()->json($this->packUserWithToken($user, 'web_r', 'user'), 201);;
     }
 
     public function login(Request $request)
@@ -62,10 +68,10 @@ class AuthController extends Controller
             $auth = Auth::user();
 
             if ($auth->isAdmin()) {
-                return response()->json($this->packUserWithToken($auth, "admin"), 202);
+                return response()->json($this->packUserWithToken($auth, 'web_lp', "admin"), 202);
             }
 
-            return response()->json($this->packUserWithToken($auth, "user"), 202);
+            return response()->json($this->packUserWithToken($auth, 'web_l', "user"), 202);
 
         } else { 
             return response()->json(['error' => 'Unauthorized'], 401);

@@ -11,7 +11,12 @@ class UserController extends Controller
     public function getCurrent(Request $request) {
         $user = $request->user();
         if ($user) {
-            return response()->json($user, 200);
+            $success = [
+                'user' => $user,
+                'policy' => $user->currentAccessToken()->abilities,
+            ];
+            return response()->json($success, 200);
+            
         } else {
             return response()->json(['error' => 'No user is active'], 404);
         }
