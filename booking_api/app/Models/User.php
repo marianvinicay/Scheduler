@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 use App\Models\Admin;
+use App\Models\AdminSettings;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -32,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $hidden = [
+        'user_id',
         'password',
         'remember_token',
     ];
@@ -54,6 +56,31 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function reservations()
     {
-        return $this->hasMany(Reservation::class);
+        return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    public function canMakeReservation() 
+    {
+        $currentPrice = AdminSettings::first()->price;
+        
+        if ($this->balance < $currentPrice) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function madeReservation() 
+    {
+        $currentPrice = AdminSettings::first()->price;
+        
+        if ($this->balance < $currentPrice) {
+            return false;
+        }
+
+        $this->balance -= $currentPrice;
+        $this->save();
+
+        return true;
     }
 }

@@ -18,6 +18,10 @@ class Reservation extends Model
         'end'
     ];
 
+    protected $hidden = [
+        'user_id',
+    ];
+
     /**
      * Get the post that owns the comment.
      */
