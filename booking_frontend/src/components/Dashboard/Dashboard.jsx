@@ -168,7 +168,7 @@ function Dashboard() {
               resources={resourceMap}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
-            formats={formats}
+              formats={formats}
             />
           </Grid>
         </Grid>

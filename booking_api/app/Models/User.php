@@ -48,4 +48,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin() {
         return Admin::where([['id', '=', $this->id], ['email', '=', $this->email]])->exists();
     }
+
+    /**
+     * Get the reservations for the user.
+     */
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }

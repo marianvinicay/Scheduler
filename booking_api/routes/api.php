@@ -6,6 +6,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReservationController;
 
 /*
@@ -23,12 +24,15 @@ Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
-    Route::get('/me', function (Request $request) {
-        return $request->user();
-    });
+    Route::get('user', [UserController::class, 'getCurrent']);
+    Route::get('user/reservations', [ReservationController::class, 'getForCurrentUser']);
+
+    Route::get('user/{uid}', [UserController::class, 'get'])
+        ->middleware(['abilities:admin']);
+    Route::get('user/{uid}/reservations', [ReservationController::class, 'getForUser'])
+        ->middleware(['abilities:admin']);
 
     Route::get('reservation/{id}', [ReservationController::class, 'get']);
-    Route::get('reservation/for-user/{uid}', [ReservationController::class, 'getForUser']);
     Route::get('reservation/for-date/{date}', [ReservationController::class, 'getForDate']);
     Route::post('reservation', [ReservationController::class, 'save']);
     Route::delete('reservation/{id}', [ReservationController::class, 'delete']);

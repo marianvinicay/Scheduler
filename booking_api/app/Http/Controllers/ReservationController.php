@@ -6,17 +6,27 @@ use Illuminate\Http\Request;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Models\User;
 
 class ReservationController extends Controller
 {
     public function get($id) {
         $reservation = Reservation::find($id);
+        $reservation->user;
 
         return response()->json($reservation, 200);
     }
 
     public function getForUser($uid) {
-        $reservations = Reservation::where('user', $uid)->get();
+        $user = User::find($uid);
+        $reservations = $user->reservations;
+
+        return response()->json($reservations, 200);
+    }
+
+    public function getForCurrentUser(Request $request) {
+        $user = $request->user();
+        $reservations = $user->reservations;
 
         return response()->json($reservations, 200);
     }
