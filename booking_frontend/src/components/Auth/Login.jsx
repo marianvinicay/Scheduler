@@ -27,7 +27,6 @@ function Login() {
 
     AuthManager.login(emailValue, passValue)
       .then((auth) => {
-        console.log(auth);
         navigate('/dashboard', { replace: true, state: auth });
       });
   };

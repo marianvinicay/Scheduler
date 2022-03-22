@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReservationController;
 
 /*
@@ -31,6 +32,9 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('reservation/for-date/{date}', [ReservationController::class, 'getForDate']);
     Route::post('reservation', [ReservationController::class, 'save']);
     Route::delete('reservation/{id}', [ReservationController::class, 'delete']);
+
+    Route::post('user/balance', [AdminController::class, 'changeBalance'])
+        ->middleware(['abilities:admin']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

@@ -41,7 +41,6 @@ const sqlDateToJSDate = (sqlDateString) => {
     const minutes = timeParts[1];
 
     const jsDate = new Date(year, month, day, hour, minutes, 0);
-    console.log(jsDate);
     return jsDate;
 };
 
@@ -62,10 +61,8 @@ const ScheduleManager = {
 
             const json = response.data;
             var events = [];
-            console.log("GET");
             for(var i = 0; i < json.length; i++) {
                 const obj = json[i];
-                console.log(obj);
                 const sDate = sqlDateToJSDate(obj.start);
                 const eDate = sqlDateToJSDate(obj.end);
 
@@ -108,7 +105,7 @@ const ScheduleManager = {
             return response.data;
 
         } catch (error) {
-            console.log(error.response.data.errors);
+            console.log(error);
         }
     },
 }

@@ -7,7 +7,11 @@ const apiAuthURL = `http://127.0.0.1:8000/api/auth`;
 const cookies = Cookies.withAttributes({ path: '/', sameSite: 'strict' }); // add domain...
 
 const client = axios.create({
-    baseURL: apiAuthURL
+    baseURL: apiAuthURL,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
 });
 
 const AuthManager = {
@@ -20,19 +24,14 @@ const AuthManager = {
             password_confirmation: passwordConfirmation
         });
 
-        client.post("/register", json, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then((response) => {
-            const token = response.data.token;
-            cookies.set('token', token, { expires: 1 });
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+        client.post("/register", json)
+            .then((response) => {
+                const token = response.data.token;
+                cookies.set('token', token, { expires: 1 });
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     },
 
     async login(email, password) {
@@ -41,12 +40,7 @@ const AuthManager = {
             password: password
         });
         try {
-            const response = await client.post("/login", json, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            });
+            const response = await client.post("/login", json);
             const r_data = response.data;
             cookies.set('token', r_data.token, { expires: 1 });
             
@@ -68,8 +62,6 @@ const AuthManager = {
         try {
             const response = await client.delete("/logout", {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
                     'Authorization': `Bearer ${token}`
                 }
             });

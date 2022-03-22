@@ -12,14 +12,15 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-    protected function packUserWithToken(User $user)
+    protected function packUserWithToken(User $user, $policy)
     {
         return [
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
             'balance' => $user->balance,
-            'token' => $user->createToken('web')->plainTextToken,
+            'policy' => $policy,
+            'token' => $user->createToken('web', [$policy])->plainTextToken,
         ];
     }
 
@@ -52,14 +53,19 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        return response()->json($this->packUserWithToken($user), 201);;
+        return response()->json($this->packUserWithToken($user, "user"), 201);;
     }
 
     public function login(Request $request)
     {
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) { 
-            $auth = Auth::user(); 
-            return response()->json($this->packUserWithToken($auth), 202);
+            $auth = Auth::user();
+
+            if ($auth->isAdmin()) {
+                return response()->json($this->packUserWithToken($auth, "admin"), 202);
+            }
+
+            return response()->json($this->packUserWithToken($auth, "user"), 202);
 
         } else { 
             return response()->json(['error' => 'Unauthorized'], 401);

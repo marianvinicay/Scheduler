@@ -2,7 +2,7 @@ import { useState, useEffect} from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 
 import Button from '@mui/material/Button';
-import { FormControl, InputLabel, NativeSelect } from '@mui/material';
+import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect } from '@mui/material';
 
 import Calendar from 'react-calendar';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
@@ -92,67 +92,88 @@ function Dashboard() {
   };
 
   return (
-    <div className="Dashboard">
-      <Button variant="contained" onClick={logout}>
-        Logout
-      </Button>
+    <Container maxWidth="lg" className="Dashboard">
+      <Stack direction="column" spacing={3}>
+        <Grid container spacing={3}>
+          <Grid item xs={9}>
+            <p>{location.state.userName}   |   Kredit: {location.state.userBalance} €</p>
+          </Grid>
+          <Grid item xs={3}>
+            <Button variant="contained" onClick={logout}>
+              Logout
+            </Button>
+          </Grid>
+        </Grid>
 
-      <Calendar
-        onChange={(date) => setDate(date)}
-        value={date}
-      />
+        <Grid container spacing={3}>
+          <Grid item xs={6}>
+            <Calendar
+              onChange={(date) => setDate(date)}
+              value={date}
+            />
+          </Grid>
 
-      <FormControl fullWidth>
-        <InputLabel variant="standard" htmlFor="uncontrolled-native">
-          Slot
-        </InputLabel>
-        <NativeSelect
-          defaultValue={slot}
-          inputProps={{
-            name: 'slot',
-            id: 'uncontrolled-native',
-          }}
-          onChange={(p) => setSlot(parseInt(p.target.value))}
-        >
-          <option value={1}>Slot 1</option>
-          <option value={2}>Slot 2</option>
-          <option value={3}>Slot 3</option>
-          <option value={4}>Slot 4</option>
-        </NativeSelect>
-      </FormControl>
+          <Grid item xs={6}>
+            <Stack direction="column" spacing={3}>
+              <FormControl fullWidth>
+                <InputLabel variant="standard" htmlFor="uncontrolled-native">
+                  Slot
+                </InputLabel>
+                <NativeSelect
+                  defaultValue={slot}
+                  inputProps={{
+                    name: 'slot',
+                    id: 'uncontrolled-native',
+                  }}
+                  onChange={(p) => setSlot(parseInt(p.target.value))}
+                >
+                  <option value={1}>Slot 1</option>
+                  <option value={2}>Slot 2</option>
+                  <option value={3}>Slot 3</option>
+                  <option value={4}>Slot 4</option>
+                </NativeSelect>
+              </FormControl>
 
-      <TimeRangePicker
-        onChange={setTime}
-        value={time}
-        minTime={'08:00'}
-        maxTime={'20:00'}
-        disableClock={true}
-        format="HH:mm"
-      />
+              <TimeRangePicker
+                onChange={setTime}
+                value={time}
+                minTime={'08:00'}
+                maxTime={'20:00'}
+                disableClock={true}
+                format="HH:mm"
+              />
 
-      <Button variant="contained" onClick={addEvent}>
-        Rezervovať
-      </Button>
-
-      <Scheduler
-      culture='sk'
-      localizer={localizer}
-      events={events}
-      defaultView={Views.DAY}
-      views={['day']}
-      step={30}
-      min={moment('08:00', 'HH:mm').toDate()}
-      max={moment('20:00', 'HH:mm').toDate()}
-      toolbar={true}
-      defaultDate={date}
-      date={date}
-      onNavigate={(date) => setDate(date)}
-      resources={resourceMap}
-      resourceIdAccessor="resourceId"
-      resourceTitleAccessor="resourceTitle"
-      formats={formats}
-    />
-    </div>
+              <Button variant="contained" onClick={addEvent}>
+                Rezervovať
+              </Button>
+            </Stack>
+          </Grid>
+        </Grid>
+        
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Scheduler
+              culture='sk'
+              localizer={localizer}
+              events={events}
+              defaultView={Views.DAY}
+              views={['day']}
+              step={30}
+              min={moment('08:00', 'HH:mm').toDate()}
+              max={moment('20:00', 'HH:mm').toDate()}
+              toolbar={true}
+              defaultDate={date}
+              date={date}
+              onNavigate={(date) => setDate(date)}
+              resources={resourceMap}
+              resourceIdAccessor="resourceId"
+              resourceTitleAccessor="resourceTitle"
+            formats={formats}
+            />
+          </Grid>
+        </Grid>
+      </Stack>
+    </Container>
   );
 }
 
