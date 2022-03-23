@@ -19,7 +19,7 @@ function Guard({ policy, content }) {
       } else { // we have a cookie, need to fetch user data (= state)
         AuthManager.currentUser()
           .then((user) => {
-            if (!user.userPolicy.includes(policy)) { // Is a route within the user's policy?
+            if (!user.policy.includes(policy)) { // Is a route within the user's policy?
               navigate("/", { replace: true, state: user });
             } else {
               setAuthorised(true);
@@ -31,7 +31,7 @@ function Guard({ policy, content }) {
           });
       }
     } else { // we have a saved state (= user data)
-      if (!location.state.userPolicy.includes(policy)) { // Is a route within the user's policy?
+      if (!location.state.policy.includes(policy)) { // Is a route within the user's policy?
         navigate("/", { replace: true , state: location.state});
       } else {
         setAuthorised(true);

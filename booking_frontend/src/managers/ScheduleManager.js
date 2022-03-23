@@ -7,7 +7,11 @@ const apiReservationURL = `http://127.0.0.1:8000/api/reservation`;
 const cookies = Cookies.withAttributes({ path: '/', sameSite: 'strict' }); // add domain...
 
 const client = axios.create({
-    baseURL: apiReservationURL
+    baseURL: apiReservationURL,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
 });
 
 const getToken = () => {
@@ -53,9 +57,7 @@ const ScheduleManager = {
         try {
             const response = await client.get(`/for-date/${year}-${month}-${day}`, {
                 headers: {
-                    'Authorization': 'Bearer ' + getToken(),
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Authorization': 'Bearer ' + getToken()
                 }
             });
 
@@ -69,6 +71,40 @@ const ScheduleManager = {
                 const event = {
                     id: obj.id,
                     title: 'Booked',
+                    start: sDate,
+                    end: eDate,
+                    resourceId: obj.slot,
+                };
+                events.push(event);
+            }
+            return events;
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    async getForDateAdmin(date) {
+        const day = date.getDate();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        try {
+            const response = await client.get(`admin/for-date/${year}-${month}-${day}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+
+            const json = response.data;
+            var events = [];
+            for (var i = 0; i < json.length; i++) {
+                const obj = json[i];
+                const sDate = sqlDateToJSDate(obj.start);
+                const eDate = sqlDateToJSDate(obj.end);
+
+                const event = {
+                    id: obj.id,
+                    title: obj.user.name,
                     start: sDate,
                     end: eDate,
                     resourceId: obj.slot,
@@ -97,9 +133,7 @@ const ScheduleManager = {
         try {
             const response = await client.post("/", json, {
                 headers: {
-                    'Authorization': 'Bearer ' + getToken(),
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Authorization': 'Bearer ' + getToken()
                 }
             });
             return response.data;

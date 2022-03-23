@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminSettingsController;
+use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReservationController;
 
@@ -29,19 +30,25 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('user/reservations', [ReservationController::class, 'getForCurrentUser']);
 
     Route::get('reservation/{id}', [ReservationController::class, 'get']);
-    Route::get('reservations/for-date/{date}', [ReservationController::class, 'getForDate']);
+    Route::get('reservation/for-date/{date}', [ReservationController::class, 'getForDate']);
     Route::post('reservation', [ReservationController::class, 'save']);
     Route::delete('reservation/{id}', [ReservationController::class, 'delete']);
 
 
     Route::middleware(['abilities:admin'])->group(function () {
         Route::get('user/{uid}', [UserController::class, 'get']);
+        Route::get('users/count', [UserController::class, 'getCount']);
+        Route::get('users/skip/{skip}/take/{take}', [UserController::class, 'getLimited']);
+        Route::get('user/{uid}/policies', [PolicyController::class, 'getFor']);
         Route::get('user/{uid}/reservations', [ReservationController::class, 'getForUser']);
-        Route::get('admin/reservations/for-date/{date}', [ReservationController::class, 'getForDateAdmin']);
+        Route::get('reservation/admin/for-date/{date}', [ReservationController::class, 'getForDateAdmin']);
         Route::post('user/balance', [AdminController::class, 'changeBalance']);
 
         Route::get('settings', [AdminSettingsController::class, 'get']);
         Route::post('settings', [AdminSettingsController::class, 'set']);
+
+        Route::post('settings/policy', [PolicyController::class, 'create']);
+        Route::delete('settings/policy/{pid}', [PolicyController::class, 'delete']);
     });
 });
 

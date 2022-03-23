@@ -7,24 +7,22 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\Models\User;
 
-class Reservation extends Model
+class Policy extends Model
 {
     use HasFactory;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-	    'user_id',
-        'slot',
-	    'start',
-        'end'
+        'user_id',
+        'type',
     ];
 
     protected $hidden = [
         'user_id',
-    ];
-
-    protected $casts = [
-        'start' => 'datetime',
-        'end' => 'datetime',
     ];
 
     /**

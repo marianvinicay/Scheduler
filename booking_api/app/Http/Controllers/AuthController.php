@@ -22,18 +22,18 @@ class AuthController extends Controller
         ];
     }
 
-    protected function packUserWithToken(User $user, $name, $policy)
+    protected function packUserWithToken(User $user, $name, $policies)
     {
-        $newToken = $user->createToken($name, [$policy]);
+        $newToken = $user->createToken($name, $policies);
         
         $userData = $this->packUser($user);
         $userData['token'] = $newToken->plainTextToken;
 
-        $policy = $newToken->accessToken->abilities;
+        $setPolicies = $newToken->accessToken->abilities;
 
         return [
             'user' => $userData,
-            'policy' => $policy,
+            'policy' => $setPolicies,
         ];
     }
 
@@ -72,13 +72,9 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) { 
-            $auth = Auth::user();
+            $user = Auth::user();
 
-            if ($auth->isAdmin()) {
-                return response()->json($this->packUserWithToken($auth, 'web_lp', "admin"), 202);
-            }
-
-            return response()->json($this->packUserWithToken($auth, 'web_l', "user"), 202);
+            return response()->json($this->packUserWithToken($user, 'web', $user->formattedPolicies()), 202);
 
         } else { 
             return response()->json(['error' => 'Unauthorized'], 401);

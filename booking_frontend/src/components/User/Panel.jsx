@@ -67,7 +67,7 @@ function Panel() {
       } else {
         AuthManager.currentUser()
           .then((user) => {
-            if (user.userPolicy.includes('admin')) {
+            if (user.policy.includes('admin')) {
               navigate("/admin", { replace: true, state: user });
             } else {
               navigate('/dashboard', { replace: true, state: user });
@@ -79,7 +79,7 @@ function Panel() {
           });
       }
     } else {
-      if (!location.state.userPolicy.includes('user')) {
+      if (!location.state.policy.includes('user')) {
         navigate("/admin", { replace: true });
       } else {
         setAuthorised(true);

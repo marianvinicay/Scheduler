@@ -33,7 +33,6 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<int, string>
      */
     protected $hidden = [
-        'user_id',
         'password',
         'remember_token',
     ];
@@ -47,16 +46,29 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
     ];
 
-    public function isAdmin() {
-        return Admin::where([['id', '=', $this->id], ['email', '=', $this->email]])->exists();
-    }
-
     /**
      * Get the reservations for the user.
      */
     public function reservations()
     {
         return $this->hasMany(Reservation::class, 'user_id');
+    }
+
+    /**
+     * Get the reservations for the user.
+     */
+    public function policies()
+    {
+        return $this->hasMany(Policy::class, 'user_id');
+    }
+
+    public function formattedPolicies()
+    {  
+        $policies = array();
+        $this->policies()->get()->each(function($policy) use (&$policies) {
+            array_push($policies, $policy->type);
+        });
+        return $policies;
     }
 
     public function canMakeReservation() 

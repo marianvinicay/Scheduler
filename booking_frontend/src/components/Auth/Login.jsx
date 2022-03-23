@@ -26,12 +26,11 @@ function Login() {
     }
 
     AuthManager.login(emailValue, passValue)
-      .then((auth) => {
-        console.log(auth);
-        if (auth.userPolicy.includes('admin')) {
-          navigate("/admin", { replace: true, state: auth });
+      .then((user) => {
+        if (user.policy.includes('admin')) {
+          navigate("/admin", { replace: true, state: user });
         } else {
-          navigate('/dashboard', { replace: true, state: auth });
+          navigate('/dashboard', { replace: true, state: user });
         }
       });
   };

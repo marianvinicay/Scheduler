@@ -3,6 +3,8 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
 
+import User from '../models/User';
+
 const apiAuthURL = `http://127.0.0.1:8000/api/auth`;
 const cookies = Cookies.withAttributes({ path: '/', sameSite: 'strict' }); // add domain...
 
@@ -41,15 +43,12 @@ const AuthManager = {
         });
         try {
             const response = await client.post("/login", json);
-            console.log(response);
+
             const user = response.data.user;
             const policy = response.data.policy;
             cookies.set('token', user.token, { expires: 1 });
             
-            const userId = user.id;
-            const userName = user.name;
-            const userBalance = user.balance;
-            return { userId: userId, userName: userName, userBalance: userBalance, userPolicy: policy };
+            return new User(user, policy);
 
         } catch (error) {
             console.log(error);
@@ -70,10 +69,7 @@ const AuthManager = {
             const user = response.data.user;
             const policy = response.data.policy;
             
-            const userId = user.id;
-            const userName = user.name;
-            const userBalance = user.balance;
-            return { userId: userId, userName: userName, userBalance: userBalance, userPolicy: policy };
+            return new User(user, policy);
 
         } catch (error) {
             console.log(error);

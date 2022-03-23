@@ -1,36 +1,85 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Container, Button } from '@mui/material';
+
+import UserManager from '../../managers/UserManager';
 
 function Users() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [userCount, setUserCount] = useState(0);
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(1);
+  const perPage = 10;
+
   useEffect(() => {
-    if (!location.state || !location.state.userPolicy.includes('admin')) {
-      navigate("/login", { replace: true });
-    }
+    UserManager.getCount()
+      .then((count) => {
+        setUserCount(count);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
-  const userPanel = () => {
-    navigate("/admin/users", { state: location.state });
+  useEffect(() => {
+    const skip = perPage * (page - 1);
+    UserManager.getLimited(skip, perPage)
+      .then((fetchedUsers) => {
+        setUsers(fetchedUsers);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [page]);
+
+  const nextPage = () => {
+    setPage(page + 1);
   };
 
-  const reservationPanel = () => {
-    navigate("/admin/reservations", { state: location.state });
+  const prevPage = () => {
+    if (page > 1) {
+      setPage(page - 1);
+    }
+  };
+
+  const pageControls = () => {
+    if (userCount > perPage) {
+      if (page > 1) {
+        return (
+          <div>
+            <Button variant="contained" onClick={prevPage}>
+              Previous
+            </Button>
+
+            <Button variant="contained" onClick={nextPage}>
+              Next
+            </Button>
+          </div>
+        );
+      }
+      return (
+        <div>
+          <Button variant="contained" onClick={nextPage}>
+            Next
+          </Button>
+        </div>
+      );
+    }
   };
 
   return (
     <div className="Admin">
       <Container fixed>
-        <Button variant="contained" onClick={userPanel}>
-          Spravovanie Uzivatelov
-        </Button>
-
-        <Button variant="contained" onClick={reservationPanel}>
-          Sprava Rezervacii
-        </Button>
+        <ul>
+          {users.map((user, index) => {
+            return <li key={index}>{user.name}</li>
+          })}
+        </ul>
+        <p>{userCount}</p>
+        {pageControls()}
       </Container>
     </div>
   );
