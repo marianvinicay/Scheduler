@@ -9,6 +9,7 @@ use Validator;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Policy;
 
 class AuthController extends Controller
 {
@@ -54,6 +55,10 @@ class AuthController extends Controller
             'email' => $email,
             'password' => bcrypt($data['password']),
             'balance' => $data['balance'] ?? 0.0,
+        ]);
+        Policy::create([
+            'user_id' => $user->id,
+            'type' => 'user',
         ]);
 
         return $user; 

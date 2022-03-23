@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Container, Button } from '@mui/material';
+import UserRow from './UserRow';
 
 import UserManager from '../../managers/UserManager';
 
@@ -71,11 +72,11 @@ function Users() {
   };
 
   return (
-    <div className="Admin">
+    <div className="admin-users">
       <Container fixed>
         <ul>
           {users.map((user, index) => {
-            return <li key={index}>{user.name}</li>
+            return <li key={index}><UserRow user={user} /></li>
           })}
         </ul>
         <p>{userCount}</p>

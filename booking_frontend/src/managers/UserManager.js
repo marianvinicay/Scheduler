@@ -66,9 +66,14 @@ const UserManager = {
             });
             const json = response.data;
             var users = [];
-            for(var i = 0; i < json.length; i++) {
-                const obj = json[i];
-                users.push(new User(obj, null));
+            for (var i = 0; i < json.length; i++) {
+                const user = json[i];
+                
+                var policies = []
+                for (var j = 0; j < user.policies.length; j++) {
+                    policies.push(user.policies[j]);
+                }
+                users.push(new User(user, policies));
             }
             return users;
 

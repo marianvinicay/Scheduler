@@ -27,7 +27,7 @@ function Login() {
 
     AuthManager.login(emailValue, passValue)
       .then((user) => {
-        if (user.policy.includes('admin')) {
+        if (user.policies.includes('admin')) {
           navigate("/admin", { replace: true, state: user });
         } else {
           navigate('/dashboard', { replace: true, state: user });

@@ -15,10 +15,10 @@ function LandingPage() {
       setFetching(false);
     
     } else if (location.state) {
-      if (location.state.policy.includes('admin')) {
+      if (location.state.policies.includes('admin')) {
         navigate("/admin", { replace: true, state: location.state });
   
-      } else if (location.state.policy.includes('user')) {
+      } else if (location.state.policies.includes('user')) {
         navigate("/dashboard", { replace: true, state: location.state });
       
       } else {
@@ -27,10 +27,10 @@ function LandingPage() {
     } else {
       AuthManager.currentUser()
         .then((user) => {
-          if (user.policy.includes('admin')) {
+          if (user.policies.includes('admin')) {
             navigate("/admin", { replace: true, state: user });
 
-          } else if (location.state.policy.includes('user')) {
+          } else if (location.state.policies.includes('user')) {
             navigate("/dashboard", { replace: true, state: user });
           
           } else {

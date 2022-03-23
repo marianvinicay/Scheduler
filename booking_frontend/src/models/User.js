@@ -1,11 +1,11 @@
 // User.js
 
 class User {
-    constructor(jsonUser, policy) {
+    constructor(jsonUser, policies) {
         this.id = jsonUser.id;
         this.name = jsonUser.name;
         this.balance = jsonUser.balance;
-        this.policy = policy;
+        this.policies = policies;
     }
 }
 

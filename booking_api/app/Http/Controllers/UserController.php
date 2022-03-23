@@ -42,6 +42,9 @@ class UserController extends Controller
 
     public function getLimited($skip, $take) {
         $users = User::all()->skip($skip)->take($take);
+        $users->each(function($user) {
+            $user->policies;
+        });
         if ($users) {
             return response()->json($users, 200);
         } else {
