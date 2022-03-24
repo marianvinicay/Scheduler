@@ -42,6 +42,8 @@ function ReservationPopup({ event, handleClose, handleDelete }) {
       onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
+      disableAutoFocus={true}
+      //disableEnforceFocus={true}
     >
       <Box sx={style}>
         <Typography id="modal-modal-title" variant="h6" component="h2">

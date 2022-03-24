@@ -50,8 +50,6 @@ function Panel() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [authorised, setAuthorised] = useState(false);
-
   const [userName, setUserName] = useState('');
   const [userBalance, setUserBalance] = useState(0);
 
@@ -62,32 +60,9 @@ function Panel() {
   const [selectedReservation, setSelectedReservation] = useState(null);
 
   useEffect(() => {
-    if (!location.state) {
-      const cookie = Cookies.get('token');
-      if (!cookie) {
-        navigate("/login", { replace: true });
-      } else {
-        AuthManager.currentUser()
-          .then((user) => {
-            if (user.policies.includes('admin')) {
-              navigate("/admin", { replace: true, state: user });
-            } else {
-              navigate('/dashboard', { replace: true, state: user });
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            navigate("/login", { replace: true });
-          });
-      }
-    } else {
-      if (!location.state.policies.includes('user')) {
-        navigate("/admin", { replace: true });
-      } else {
-        setAuthorised(true);
-        setUserName(location.state.userName);
-        setUserBalance(location.state.userBalance);
-      }
+    if (location.state) {
+      setUserName(location.state.name);
+      setUserBalance(location.state.balance);
     }
   }, [location]);
 
@@ -107,16 +82,21 @@ function Panel() {
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
-      ScheduleManager.save(startDate, endDate, slot, location.state.userId)
+      ScheduleManager.save(startDate, endDate, slot)
         .then((newEvent) => {
+          console.log(newEvent);
           const calEvent = {
             id: newEvent.id,
-            title: 'Booked',
+            title: 'My session',
             start: startDate,
             end: endDate,
             resourceId: slot,
+            editable: true,
           };
           setEvents((oldEvents) => [...oldEvents, calEvent]);
+        })
+        .catch((error) => {
+          console.log(error);
         });
     }
   };
@@ -127,13 +107,6 @@ function Panel() {
         	navigate('/', { replace: true });
       	});
   };
-
-  if (!authorised) {
-    return (
-      <Container>
-      </Container>
-    )
-  }
 
   return (
     <Container maxWidth="lg" className="Dashboard">

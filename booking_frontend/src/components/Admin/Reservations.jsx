@@ -80,7 +80,7 @@ function Reservations() {
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
-      ScheduleManager.save(startDate, endDate, slot, location.state.userId)
+      ScheduleManager.save(startDate, endDate, slot)
         .then((newEvent) => {
           const calEvent = {
             id: newEvent.id,

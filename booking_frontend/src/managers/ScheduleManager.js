@@ -91,7 +91,7 @@ const ScheduleManager = {
                 const event = {
                     id: obj.id,
                     editable: obj.editable,
-                    title: 'Booked',
+                    title: obj.editable ? 'My Session' : 'Booked',
                     start: sDate,
                     end: eDate,
                     resourceId: obj.slot,
@@ -139,18 +139,16 @@ const ScheduleManager = {
         }
     },
 
-    async save(sDate, eDate, slot, userId) {
+    async save(sDate, eDate, slot) {
         const sComps = extractComponents(sDate);
         const eComps = extractComponents(eDate);
 
         const json = JSON.stringify({
-            user: userId,
             slot: slot,
-            timezone: "UTC",
             start: `${sComps.year}-${sComps.month}-${sComps.day} ${sComps.hour}:${sComps.minute}:00`,
             end: `${eComps.year}-${eComps.month}-${eComps.day} ${eComps.hour}:${eComps.minute}:00`
         });
-
+        console.log(json);
         try {
             const response = await client.post("/", json, {
                 headers: {
@@ -160,7 +158,7 @@ const ScheduleManager = {
             return response.data;
 
         } catch (error) {
-            console.log(error);
+            throw error.response.data.error;
         }
     },
 
