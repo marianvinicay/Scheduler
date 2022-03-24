@@ -16,7 +16,7 @@ class CreatePoliciesTable extends Migration
         Schema::create('policies', function (Blueprint $table) {
             $table->id()->unique()->autoIncrement();;
             $table->unsignedBigInteger('user_id')->required();
-	        $table->set('type', ['admin', 'manager', 'user'])->required()->unique('user_id');
+	        $table->set('type', ['admin', 'manager', 'user'])->required();
             $table->timestamps();
         });
         

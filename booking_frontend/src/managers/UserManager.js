@@ -82,6 +82,45 @@ const UserManager = {
         }
     },
 
+    async getCount() {
+        try {
+            const response = await client.get(`users/count`, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+            return response.data.count;
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    async setPolicyFor(uid, newPolicies) {
+        try {
+            const input = {
+                user_id: uid,
+                policies: newPolicies
+            };
+            const response = await client.post('settings/policy/set', input, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+            const user = response.data;
+
+            var policies = []
+            for (var i = 0; i < user.policies.length; i++) {
+                policies.push(user.policies[i]);
+            }
+            
+            return new User(user, policies);
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
     async save(sDate, eDate, slot, userId) {
     },
 }

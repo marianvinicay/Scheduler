@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
         Route::post('settings', [AdminSettingsController::class, 'set']);
 
         Route::post('settings/policy', [PolicyController::class, 'create']);
+        Route::post('settings/policy/set', [PolicyController::class, 'setForUser']);
         Route::delete('settings/policy/{pid}', [PolicyController::class, 'delete']);
     });
 });
