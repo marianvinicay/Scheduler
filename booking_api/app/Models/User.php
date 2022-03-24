@@ -62,6 +62,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Policy::class, 'user_id');
     }
 
+    public function isAdmin()
+    {
+        return $this->policies()->where('type', 'admin')->exists();
+    }
+
     public function formattedPolicies()
     {  
         $policies = array();

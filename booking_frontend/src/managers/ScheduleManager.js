@@ -33,22 +33,42 @@ const extractComponents = (date) => {
 };
 
 const sqlDateToJSDate = (sqlDateString) => {
+    return new Date(sqlDateString);
+    /*
     const dateParts = sqlDateString.split("-");
     const year = dateParts[0];
     const month = dateParts[1] - 1;
 
     const tail = dateParts[2].split(" ");
     const day = tail[0];
-    
+    console.log(tail);
     const timeParts = tail[1].split(":");
     const hour = timeParts[0];
     const minutes = timeParts[1];
 
     const jsDate = new Date(year, month, day, hour, minutes, 0);
     return jsDate;
+    */
 };
 
 const ScheduleManager = {
+
+    async get(rid) {
+        try {
+            const response = await client.get(`/${rid}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+
+            const reservationJson = response.data;
+
+            return reservationJson;
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
 
     async getForDate(date) {
         const day = date.getDate();
@@ -63,7 +83,7 @@ const ScheduleManager = {
 
             const json = response.data;
             var events = [];
-            for(var i = 0; i < json.length; i++) {
+            for (var i = 0; i < json.length; i++) {
                 const obj = json[i];
                 const sDate = sqlDateToJSDate(obj.start);
                 const eDate = sqlDateToJSDate(obj.end);
@@ -89,7 +109,7 @@ const ScheduleManager = {
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         try {
-            const response = await client.get(`admin/for-date/${year}-${month}-${day}`, {
+            const response = await client.get(`/admin/for-date/${year}-${month}-${day}`, {
                 headers: {
                     'Authorization': 'Bearer ' + getToken()
                 }
@@ -142,6 +162,34 @@ const ScheduleManager = {
             console.log(error);
         }
     },
+
+    async delete(rId) {
+        try {
+            const response = await client.delete(`/${rId}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+            return response.data;
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    async deleteAdmin(rId) {
+        try {
+            const response = await client.delete(`/admin/${rId}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + getToken()
+                }
+            });
+            return response.data;
+
+        } catch (error) {
+            console.log(error);
+        }
+    },
 }
-  
-  export default ScheduleManager;
+
+export default ScheduleManager;

@@ -10,9 +10,21 @@ use App\Models\User;
 
 class ReservationController extends Controller
 {
-    public function get($id) {
+    public function get(Request $request, $id) {
+        $user = $request->user();
         $reservation = Reservation::find($id);
-        $reservation->user;
+
+        if ($reservation) {
+            if ($reservation->user == $user || $user->isAdmin()) {
+                return response()->json($reservation, 200);
+
+            } else {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+        } else {
+            return response()->json(['error' => 'Reservation not found'], 404);
+        }
 
         return response()->json($reservation, 200);
     }
@@ -76,9 +88,21 @@ class ReservationController extends Controller
         }
     }
 
-    public function delete(Reservation $reservation) {
-        $reservation->delete();
+    public function delete(Request $request, $rid) {
+        $user = $request->user();
+        $reservation = Reservation::find($rid);
 
-        return response()->json(null, 204);
+        if ($reservation->user->id == $user->id) {
+            $reservation->delete();
+            return response()->json(['message' => 'Delete successful'], 204); // What does 204 mean?
+        } else {
+            return response()->json(['error' => 'You are not allowed to delete this reservation'], 403);
+        }
+    }
+
+    public function deleteAdmin($rid) {
+        $reservation = Reservation::find($rid);
+        $reservation->delete();
+        return response()->json(['message' => 'Delete successful'], 204);
     }
 }

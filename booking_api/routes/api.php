@@ -34,15 +34,16 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('reservation', [ReservationController::class, 'save']);
     Route::delete('reservation/{id}', [ReservationController::class, 'delete']);
 
-
     Route::middleware(['abilities:admin'])->group(function () {
         Route::get('user/{uid}', [UserController::class, 'get']);
         Route::get('users/count', [UserController::class, 'getCount']);
         Route::get('users/skip/{skip}/take/{take}', [UserController::class, 'getLimited']);
         Route::get('user/{uid}/policies', [PolicyController::class, 'getFor']);
         Route::get('user/{uid}/reservations', [ReservationController::class, 'getForUser']);
-        Route::get('reservation/admin/for-date/{date}', [ReservationController::class, 'getForDateAdmin']);
         Route::post('user/balance', [AdminController::class, 'changeBalance']);
+        
+        Route::get('reservation/admin/for-date/{date}', [ReservationController::class, 'getForDateAdmin']);
+        Route::delete('reservation/admin/{id}', [ReservationController::class, 'deleteAdmin']);
 
         Route::get('settings', [AdminSettingsController::class, 'get']);
         Route::post('settings', [AdminSettingsController::class, 'set']);

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
+import ReservationPopup from './ReservationPopup';
 
 import Calendar from 'react-calendar';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
@@ -55,6 +56,7 @@ function Reservations() {
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(1);
   const [events, setEvents] = useState([]);
+  const [selectedReservation, setSelectedReservation] = useState(null);
 
   useEffect(() => {
     setUserName(location.state.userName);
@@ -173,6 +175,7 @@ function Reservations() {
               defaultDate={date}
               date={date}
               onNavigate={(date) => setDate(date)}
+              onSelectEvent={(event) => setSelectedReservation(event)}
               resources={resourceMap}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
@@ -181,6 +184,21 @@ function Reservations() {
           </Grid>
         </Grid>
       </Stack>
+
+      <ReservationPopup 
+        event={selectedReservation} 
+        handleClose={() => setSelectedReservation(null)}
+        handleDelete={() => {
+          ScheduleManager.deleteAdmin(selectedReservation.id)
+            .then(() => {
+              setEvents(events.filter((event) => event.id !== selectedReservation.id));
+              setSelectedReservation(null);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }}
+      />
     </Container>
   );
 }
