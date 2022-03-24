@@ -90,6 +90,7 @@ const ScheduleManager = {
 
                 const event = {
                     id: obj.id,
+                    editable: obj.editable,
                     title: 'Booked',
                     start: sDate,
                     end: eDate,

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import Cookies from 'js-cookie';
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
+import ReservationPopup from '../Admin/ReservationPopup';
 
 import Calendar from 'react-calendar';
 import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
@@ -58,6 +59,7 @@ function Panel() {
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(1);
   const [events, setEvents] = useState([]);
+  const [selectedReservation, setSelectedReservation] = useState(null);
 
   useEffect(() => {
     if (!location.state) {
@@ -207,6 +209,14 @@ function Panel() {
               defaultDate={date}
               date={date}
               onNavigate={(date) => setDate(date)}
+              selected={selectedReservation}
+              onSelectEvent={(event) => {
+                if (event.editable) {
+                  setSelectedReservation(event);
+                } else {
+                  setSelectedReservation(null);
+                }
+              }}
               resources={resourceMap}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
@@ -215,6 +225,21 @@ function Panel() {
           </Grid>
         </Grid>
       </Stack>
+
+      <ReservationPopup 
+        event={selectedReservation} 
+        handleClose={() => setSelectedReservation(null)}
+        handleDelete={() => {
+          ScheduleManager.delete(selectedReservation.id)
+            .then(() => {
+              setEvents(events.filter((event) => event.id !== selectedReservation.id));
+              setSelectedReservation(null);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }}
+      />
     </Container>
   );
 }

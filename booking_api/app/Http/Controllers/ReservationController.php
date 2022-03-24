@@ -15,7 +15,7 @@ class ReservationController extends Controller
         $reservation = Reservation::find($id);
 
         if ($reservation) {
-            if ($reservation->user == $user || $user->isAdmin()) {
+            if ($reservation->user->id == $user->id || $user->isAdmin()) {
                 return response()->json($reservation, 200);
 
             } else {
@@ -52,15 +52,17 @@ class ReservationController extends Controller
         return response()->json($reservations, 200);
     }
 
-    public function getForDate($date) {
+    public function getForDate(Request $request, $date) {
+        $user = $request->user();
         $reservations = Reservation::whereDate('start', $date)->get();
-        
-        $strippedReservations = $reservations->map(function ($reservation) {
+
+        $strippedReservations = $reservations->map(function ($reservation) use ($user) {
             return [
                 'id' => $reservation->id,
                 "slot" => $reservation->slot,
                 "start" => $reservation->start,
                 "end" => $reservation->end,
+                'editable' => $reservation->user->id == $user->id,
             ];
         });
 
