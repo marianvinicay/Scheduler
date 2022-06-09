@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import Navbar from '../Navbar';
 import LandingPage from '../Auth/LandingPage';
 import Login from '../Auth/Login';
 import Register from '../Auth/Register';
@@ -19,7 +20,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Guard policy='user' content={<UserPanel />} />} />
+            <Route path="/dashboard" element={<Guard policy='user' content={<Navbar content={<UserPanel />} />} />} />
             <Route path="/admin" element={<Guard policy='admin' content={<AdminPanel />} />} />
             <Route path="/admin/users" element={<Guard policy='admin' content={<AdminUsers />} />} />
             <Route path="/admin/reservations" element={<Guard policy='admin' content={<AdminReservations />} />} />

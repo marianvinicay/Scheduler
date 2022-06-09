@@ -1,6 +1,7 @@
 // ScheduleManager.js
 
 import axios from 'axios';
+import { DateTime } from 'luxon';
 import Cookies from 'js-cookie';
 
 const apiReservationURL = `http://127.0.0.1:8000/api/reservation`;
@@ -29,11 +30,15 @@ const extractComponents = (date) => {
     const year = date.getFullYear();
     const hour = date.getHours();
     const minute = date.getMinutes();
-    return { day, month, year, hour, minute };
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    const newDate = new DateTime(year, month, day, hour, minute, 0, 0);
+    newDate.setZone(timezone)
+    return newDate;
 };
 
-const sqlDateToJSDate = (sqlDateString) => {
-    return new Date(sqlDateString);
+const sqlDateToJSDate = (sqlDateString, timezone) => {
+    return DateTime.fromSQL(sqlDateString, { zone: timezone }).toJSDate();
     /*
     const dateParts = sqlDateString.split("-");
     const year = dateParts[0];
@@ -85,8 +90,10 @@ const ScheduleManager = {
             var events = [];
             for (var i = 0; i < json.length; i++) {
                 const obj = json[i];
-                const sDate = sqlDateToJSDate(obj.start);
-                const eDate = sqlDateToJSDate(obj.end);
+
+                const timezone = obj.timezone;
+                const sDate = sqlDateToJSDate(obj.start, timezone);
+                const eDate = sqlDateToJSDate(obj.end, timezone);
 
                 const event = {
                     id: obj.id,
@@ -140,13 +147,17 @@ const ScheduleManager = {
     },
 
     async save(sDate, eDate, slot) {
-        const sComps = extractComponents(sDate);
-        const eComps = extractComponents(eDate);
+        const sComps = DateTime.fromJSDate(sDate);
+        const eComps = DateTime.fromJSDate(eDate);
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
         const json = JSON.stringify({
             slot: slot,
-            start: `${sComps.year}-${sComps.month}-${sComps.day} ${sComps.hour}:${sComps.minute}:00`,
-            end: `${eComps.year}-${eComps.month}-${eComps.day} ${eComps.hour}:${eComps.minute}:00`
+            start: sComps.toFormat('yyyy-LL-dd HH:mm'),
+            end: eComps.toFormat('yyyy-LL-dd HH:mm'),
+            timezone: timezone,
+            //start: `${sComps.year}-${sComps.month}-${sComps.day} ${sComps.hour}:${sComps.minute}:00`,
+            //end: `${eComps.year}-${eComps.month}-${eComps.day} ${eComps.hour}:${eComps.minute}:00`
         });
         console.log(json);
         try {

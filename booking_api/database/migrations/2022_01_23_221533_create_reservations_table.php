@@ -17,8 +17,10 @@ class CreateReservationsTable extends Migration
             $table->id()->unique()->autoIncrement();;
             $table->unsignedBigInteger('user_id')->required();
 	        $table->integer('slot')->required();
-	        $table->dateTime('start')->required();
-	        $table->dateTime('end')->required();
+	        $table->dateTimeTz('start')->required();
+	        $table->dateTimeTz('end')->required();
+            $table->string('timezone')->required();
+            $table->double('paid')->required();
             $table->timestamps();
         });
         

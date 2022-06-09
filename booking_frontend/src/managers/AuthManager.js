@@ -92,7 +92,7 @@ const AuthManager = {
                 cookies.remove('token');
             }
         } catch (error) {
-            console.log(error);
+            throw(error.response.data);
         }
     }
 }

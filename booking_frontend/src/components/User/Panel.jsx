@@ -1,7 +1,6 @@
 import { useState, useEffect} from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
-import Cookies from 'js-cookie';
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
 import ReservationPopup from '../Admin/ReservationPopup';
 
@@ -14,8 +13,8 @@ import 'moment/locale/sk.js';
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/sass/styles.scss';
 
-import AuthManager from '../../managers/AuthManager';
 import ScheduleManager from '../../managers/ScheduleManager';
+import AuthManager from '../../managers/AuthManager';
 
 moment.locale('sk');
 const localizer = momentLocalizer(moment);
@@ -47,11 +46,7 @@ const checkEvents = (events, startDate, endDate) => {
 };
 
 function Panel() {
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const [userName, setUserName] = useState('');
-  const [userBalance, setUserBalance] = useState(0);
 
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
@@ -60,14 +55,8 @@ function Panel() {
   const [selectedReservation, setSelectedReservation] = useState(null);
 
   useEffect(() => {
-    if (location.state) {
-      setUserName(location.state.name);
-      setUserBalance(location.state.balance);
-    }
-  }, [location]);
-
-  useEffect(() => {
     ScheduleManager.getForDate(date).then((events) => {
+      console.log(events);
       setEvents(events);
     });
   }, [date]);
@@ -82,9 +71,13 @@ function Panel() {
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
+      console.log('Adding event');
       ScheduleManager.save(startDate, endDate, slot)
         .then((newEvent) => {
-          console.log(newEvent);
+          AuthManager.currentUser().then((user) => {
+            location.state = user;
+          });
+
           const calEvent = {
             id: newEvent.id,
             title: 'My session',
@@ -101,27 +94,9 @@ function Panel() {
     }
   };
 
-  const logout = () => {
-    AuthManager.logout()
-		.then(() => {
-        	navigate('/', { replace: true });
-      	});
-  };
-
   return (
     <Container maxWidth="lg" className="Dashboard">
       <Stack direction="column" spacing={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <p>{userName}   |   Kredit: {userBalance} €</p>
-          </Grid>
-          <Grid item xs={3}>
-            <Button variant="contained" onClick={logout}>
-              Logout
-            </Button>
-          </Grid>
-        </Grid>
-
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Calendar

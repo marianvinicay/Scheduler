@@ -18,7 +18,7 @@ class CreateAdminSettingsTable extends Migration
 	        $table->double('price')->required();
 	        $table->string('start_time')->required();
             $table->string('end_time')->required();
-            $table->json('slots')->required()->default('["Slot 1"]');
+            $table->json('slots')->nullable();//->required()->default('{slots: ["Slot 1"]}');
             $table->json('except_days')->nullable();
         });
     }

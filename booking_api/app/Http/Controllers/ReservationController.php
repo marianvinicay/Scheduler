@@ -60,8 +60,9 @@ class ReservationController extends Controller
             return [
                 'id' => $reservation->id,
                 "slot" => $reservation->slot,
-                "start" => $reservation->start,
-                "end" => $reservation->end,
+                "start" => $reservation->start_date,
+                "end" => $reservation->end_date,
+                "timezone" => $reservation->timezone,
                 'editable' => $reservation->user->id == $user->id,
             ];
         });
@@ -75,6 +76,7 @@ class ReservationController extends Controller
         if ($user->canMakeReservation()) {
             $input = $request->all();
             $input['user_id'] = $user->id;
+            $input['paid'] = true;
 
             $reservation = Reservation::create($input);
             
@@ -98,7 +100,7 @@ class ReservationController extends Controller
             $reservation->delete();
             return response()->json(['message' => 'Delete successful'], 204); // What does 204 mean?
         } else {
-            return response()->json(['error' => 'You are not allowed to delete this reservation'], 403);
+            return response()->json(['error' => 'You are not allowed to delete this reservation'], 401);
         }
     }
 
