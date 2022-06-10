@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Container, Box, Button, TextField, Divider } from '@mui/material';
 
 import AuthManager from '../../managers/AuthManager';
+import SettingsManager from '../../managers/SettingsManager';
 
 function Login() {
   const [emailValue, setEmailValue] = useState("");
@@ -27,11 +28,23 @@ function Login() {
 
     AuthManager.login(emailValue, passValue)
       .then((user) => {
-        if (user.policies.includes('admin')) {
-          navigate("/admin", { replace: true, state: user });
-        } else {
-          navigate('/dashboard', { replace: true, state: user });
-        }
+        SettingsManager.getSettings()
+          .then((settings) => {
+            const currentState = { user: user, settings: settings };
+
+            if (user.policies.includes('admin')) {
+              navigate("/admin", { replace: true, state: currentState });
+            } else {
+              navigate('/dashboard', { replace: true, state: currentState });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        // TODO: Show error message
       });
   };
 

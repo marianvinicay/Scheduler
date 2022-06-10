@@ -24,8 +24,9 @@ class AdminSettingsController extends Controller
         $settings = AdminSettings::first();
         if (!$settings) {
             $settings = AdminSettings::create($request->all());
+        } else {
+            $settings->fill($request->all());
         }
-        $settings->fill($request->all());
         $settings->save();
 
         return response()->json($settings, 200);

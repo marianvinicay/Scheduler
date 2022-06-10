@@ -15,10 +15,10 @@ function LandingPage() {
       setFetching(false);
     
     } else if (location.state) {
-      if (location.state.policies.includes('admin')) {
+      if (location.state.user.policies.includes('admin')) {
         navigate("/admin", { replace: true, state: location.state });
   
-      } else if (location.state.policies.includes('user')) {
+      } else if (location.state.user.policies.includes('user')) {
         navigate("/dashboard", { replace: true, state: location.state });
       
       } else {
@@ -30,7 +30,7 @@ function LandingPage() {
           if (user.policies.includes('admin')) {
             navigate("/admin", { replace: true, state: user });
 
-          } else if (location.state.policies.includes('user')) {
+          } else if (location.state.user.policies.includes('user')) {
             navigate("/dashboard", { replace: true, state: user });
           
           } else {
@@ -42,7 +42,7 @@ function LandingPage() {
           setFetching(false);
         });
     }
-  }, [location]);
+  }, [location, navigate]);
 
   if (fetching) {
     return (

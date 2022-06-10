@@ -31,13 +31,13 @@ function Guard({ policy, content }) {
           });
       }
     } else { // we have a saved state (= user data)
-      if (!location.state.policies.includes(policy)) { // Is a route within the user's policy?
+      if (!location.state.user.policies.includes(policy)) { // Is a route within the user's policy?
         navigate("/", { replace: true , state: location.state});
       } else {
         setAuthorised(true);
       }
     }
-  }, [location]);
+  }, [location, navigate, policy]);
 
   if (!authorised) {
     return (

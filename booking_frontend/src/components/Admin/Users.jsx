@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
 
 import { Container, Button } from '@mui/material';
 import UserRow from './UserRow';
@@ -7,9 +6,6 @@ import UserRow from './UserRow';
 import UserManager from '../../managers/UserManager';
 
 function Users() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   const [userCount, setUserCount] = useState(0);
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);

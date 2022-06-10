@@ -82,20 +82,6 @@ const UserManager = {
         }
     },
 
-    async getCount() {
-        try {
-            const response = await client.get(`users/count`, {
-                headers: {
-                    'Authorization': 'Bearer ' + getToken()
-                }
-            });
-            return response.data.count;
-
-        } catch (error) {
-            console.log(error);
-        }
-    },
-
     async setPolicyFor(uid, newPolicies) {
         try {
             const input = {

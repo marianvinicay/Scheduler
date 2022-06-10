@@ -24,36 +24,10 @@ const getToken = () => {
     }
 };
 
-const extractComponents = (date) => {
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    const newDate = new DateTime(year, month, day, hour, minute, 0, 0);
-    newDate.setZone(timezone)
-    return newDate;
-};
-
 const sqlDateToJSDate = (sqlDateString, timezone) => {
-    return DateTime.fromSQL(sqlDateString, { zone: timezone }).toJSDate();
-    /*
-    const dateParts = sqlDateString.split("-");
-    const year = dateParts[0];
-    const month = dateParts[1] - 1;
-
-    const tail = dateParts[2].split(" ");
-    const day = tail[0];
-    console.log(tail);
-    const timeParts = tail[1].split(":");
-    const hour = timeParts[0];
-    const minutes = timeParts[1];
-
-    const jsDate = new Date(year, month, day, hour, minutes, 0);
-    return jsDate;
-    */
+    return DateTime
+        .fromSQL(sqlDateString, { zone: timezone })
+        .toJSDate();
 };
 
 const ScheduleManager = {

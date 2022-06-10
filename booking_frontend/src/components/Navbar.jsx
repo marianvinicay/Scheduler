@@ -15,10 +15,9 @@ function Navbar({ content }) {
 
   useEffect(() => {
     if (location.state) {
-      console.log(location.state);
-      setUserName(location.state.name);
-      setUserBalance(location.state.balance);
-      setPolicies(location.state.policies);
+      setUserName(location.state.user.name);
+      setUserBalance(location.state.user.balance);
+      setPolicies(location.state.user.policies);
     }
   }, [location]);
 

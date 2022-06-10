@@ -1,4 +1,4 @@
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from "react-router-dom";
 
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
@@ -15,16 +15,10 @@ import 'react-big-calendar/lib/sass/styles.scss';
 
 import ScheduleManager from '../../managers/ScheduleManager';
 import AuthManager from '../../managers/AuthManager';
+import SettingsManager from '../../managers/SettingsManager';
 
 moment.locale('sk');
 const localizer = momentLocalizer(moment);
-
-const resourceMap = [
-  { resourceId: 1, resourceTitle: 'Slot 1' },
-  { resourceId: 2, resourceTitle: 'Slot 2' },
-  { resourceId: 3, resourceTitle: 'Slot 3' },
-  { resourceId: 4, resourceTitle: 'Slot 4' },
-];
 
 const formats = {
   timeGutterFormat: 'HH:mm',
@@ -36,7 +30,7 @@ const checkEvents = (events, startDate, endDate) => {
     const end = moment(event.end);
     const dateToCheckStart = moment(startDate);
     const dateToCheckEnd = moment(endDate);
-    
+
     const startNotClear = dateToCheckStart.isBetween(start, end);
     const endNotClear = dateToCheckEnd.isBetween(start, end);
     return startNotClear && endNotClear;
@@ -48,21 +42,28 @@ const checkEvents = (events, startDate, endDate) => {
 function Panel() {
   const location = useLocation();
 
-  const [time, setTime] = useState(['14:00', '15:00']);
+  const [time, setTime] = useState([]);
   const [date, setDate] = useState(new Date());
-  const [slot, setSlot] = useState(1);
+  const [slot, setSlot] = useState(0);
   const [events, setEvents] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
 
   useEffect(() => {
+    SettingsManager.getSettings().then((settings) => {
+      location.state.settings = settings;
+    })
+
     ScheduleManager.getForDate(date).then((events) => {
-      console.log(events);
       setEvents(events);
     });
-  }, [date]);
+  }, [location.state, date]);
+
+  const getSettings = () => {
+    return location.state.settings;
+  };
 
   const addEvent = () => {
-    let startDate = new Date(date.valueOf()); 
+    let startDate = new Date(date.valueOf());
     startDate.setHours(time[0].split(':')[0]);
     startDate.setMinutes(time[0].split(':')[1]);
 
@@ -71,11 +72,10 @@ function Panel() {
     endDate.setMinutes(time[1].split(':')[1]);
 
     if (checkEvents(events, startDate, endDate)) {
-      console.log('Adding event');
       ScheduleManager.save(startDate, endDate, slot)
         .then((newEvent) => {
           AuthManager.currentUser().then((user) => {
-            location.state = user;
+            location.state.user = user;
           });
 
           const calEvent = {
@@ -100,7 +100,7 @@ function Panel() {
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Calendar
-              onChange={(date) => setDate(date)}
+              onChange={setDate}
               value={date}
             />
           </Grid>
@@ -119,10 +119,9 @@ function Panel() {
                   }}
                   onChange={(p) => setSlot(parseInt(p.target.value))}
                 >
-                  <option value={1}>Slot 1</option>
-                  <option value={2}>Slot 2</option>
-                  <option value={3}>Slot 3</option>
-                  <option value={4}>Slot 4</option>
+                  {getSettings().slots.map((value, index) => {
+                    return <option key={index} value={index}>{value}</option>
+                  })}
                 </NativeSelect>
               </FormControl>
 
@@ -141,7 +140,7 @@ function Panel() {
             </Stack>
           </Grid>
         </Grid>
-        
+
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Scheduler
@@ -156,7 +155,7 @@ function Panel() {
               toolbar={true}
               defaultDate={date}
               date={date}
-              onNavigate={(date) => setDate(date)}
+              onNavigate={setDate}
               selected={selectedReservation}
               onSelectEvent={(event) => {
                 if (event.editable) {
@@ -165,7 +164,9 @@ function Panel() {
                   setSelectedReservation(null);
                 }
               }}
-              resources={resourceMap}
+              resources={getSettings().slots.map((value, index) => {
+                return { resourceId: index, resourceTitle: value }
+              })}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
               formats={formats}
@@ -174,8 +175,8 @@ function Panel() {
         </Grid>
       </Stack>
 
-      <ReservationPopup 
-        event={selectedReservation} 
+      <ReservationPopup
+        event={selectedReservation}
         handleClose={() => setSelectedReservation(null)}
         handleDelete={() => {
           ScheduleManager.delete(selectedReservation.id)

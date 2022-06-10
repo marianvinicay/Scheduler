@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
 
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
 import ReservationPopup from './ReservationPopup';
 
 import Calendar from 'react-calendar';
-import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
+import TimeRangePicker from '@wojtekmaj/react-timerange-picker/dist/TimeRangePicker';
 import { Calendar as Scheduler, Views, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/sk.js';
@@ -45,22 +44,11 @@ const checkEvents = (events, startDate, endDate) => {
 };
 
 function Reservations() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const [userName, setUserName] = useState('');
-  const [userBalance, setUserBalance] = useState(0);
-
   const [time, setTime] = useState(['14:00', '15:00']);
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(1);
   const [events, setEvents] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
-
-  useEffect(() => {
-    setUserName(location.state.userName);
-    setUserBalance(location.state.userBalance);
-  }, [location]);
 
   useEffect(() => {
     ScheduleManager.getForDateAdmin(date)

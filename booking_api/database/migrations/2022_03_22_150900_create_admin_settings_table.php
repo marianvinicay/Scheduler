@@ -16,9 +16,9 @@ class CreateAdminSettingsTable extends Migration
         Schema::create('admin_settings', function (Blueprint $table) {
             $table->set('the_only', ['only'])->default('only')->unique();
 	        $table->double('price')->required();
+            $table->json('slots')->nullable();//->required()->default('{slots: ["Slot 1"]}');
 	        $table->string('start_time')->required();
             $table->string('end_time')->required();
-            $table->json('slots')->nullable();//->required()->default('{slots: ["Slot 1"]}');
             $table->json('except_days')->nullable();
         });
     }

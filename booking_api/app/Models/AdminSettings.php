@@ -13,6 +13,7 @@ class AdminSettings extends Model
 
     protected $fillable = [
         'price',
+        'slots',
 	    'start_time',
 	    'end_time',
         'except_days',
