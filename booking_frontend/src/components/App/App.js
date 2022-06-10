@@ -23,7 +23,7 @@ function App() {
             <Route path="/dashboard" element={<Guard policy='user' content={<Navbar content={<UserPanel />} />} />} />
             <Route path="/admin" element={<Guard policy='admin' content={<AdminPanel />} />} />
             <Route path="/admin/users" element={<Guard policy='admin' content={<AdminUsers />} />} />
-            <Route path="/admin/reservations" element={<Guard policy='admin' content={<AdminReservations />} />} />
+            <Route path="/admin/reservations" element={<Guard policy='admin' content={<Navbar content={<AdminReservations />} />} />} />
           </Routes>
         </BrowserRouter>
     </div>

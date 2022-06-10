@@ -11,11 +11,14 @@ function Navbar({ content }) {
 
   const [userName, setUserName] = useState('');
   const [userBalance, setUserBalance] = useState(0);
+  const [policies, setPolicies] = useState([]);
 
   useEffect(() => {
     if (location.state) {
+      console.log(location.state);
       setUserName(location.state.name);
       setUserBalance(location.state.balance);
+      setPolicies(location.state.policies);
     }
   }, [location]);
 
@@ -25,17 +28,37 @@ function Navbar({ content }) {
      	  navigate('/', { replace: true });
       })
       .catch((error) => {
+        navigate('/', { replace: true });
         console.log(error);
       });
   };
+
+  const goBack = () => {
+    navigate('/admin', { state: location.state });
+  };
+
+  let label;
+  if (policies.includes('admin')) {
+    label = <p>{userName}   |   Admin Login</p>;
+  } else {
+    label = <p>{userName}   |   Kredit: {userBalance} €</p>;
+  }
 
   return (
     <div>
       <Stack direction="column" spacing={3}>
         <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <p>{userName}   |   Kredit: {userBalance} €</p>
+          <Grid item xs={6}>
+            {label}
           </Grid>
+
+          {policies.includes('admin') && 
+          <Grid item xs={3}>
+            <Button variant="contained" onClick={goBack}>
+              Back
+            </Button>
+          </Grid>}
+
           <Grid item xs={3}>
             <Button variant="contained" onClick={logout}>
               Logout

@@ -13,7 +13,6 @@ import 'moment/locale/sk.js';
 import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/sass/styles.scss';
 
-import AuthManager from '../../managers/AuthManager';
 import ScheduleManager from '../../managers/ScheduleManager';
 
 moment.locale('sk');
@@ -94,27 +93,9 @@ function Reservations() {
     }
   };
 
-  const logout = () => {
-    AuthManager.logout()
-      .then(() => {
-        navigate('/', { replace: true });
-      });
-  };
-
   return (
     <Container maxWidth="lg" className="Dashboard">
       <Stack direction="column" spacing={3}>
-        <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <p>{userName}   |   Kredit: {userBalance} €</p>
-          </Grid>
-          <Grid item xs={3}>
-            <Button variant="contained" onClick={logout}>
-              Logout
-            </Button>
-          </Grid>
-        </Grid>
-
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Calendar

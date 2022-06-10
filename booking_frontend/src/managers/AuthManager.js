@@ -88,10 +88,9 @@ const AuthManager = {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if (response.status === 200) {
-                cookies.remove('token');
-            }
+            cookies.remove('token');
         } catch (error) {
+            cookies.remove('token');
             throw(error.response.data);
         }
     }
