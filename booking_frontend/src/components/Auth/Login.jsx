@@ -35,6 +35,11 @@ function Login() {
       });
   };
 
+  const onFormSubmit = (e) => {
+    e.preventDefault();
+    login();
+  };
+
   const emailChange = (e) => {
     setEmailValue(e.target.value);
   };
@@ -51,16 +56,18 @@ function Login() {
         gap: 3,
         gridTemplateRows: 'repeat(5, 1fr)' 
       }}>
-        <TextField id="outlined-required" label="E-mail" variant="outlined" autoComplete="email" onChange={emailChange} />
-        
-        <TextField id="outlined-password-input" label="Heslo" variant="outlined" type="password"
-          autoComplete="current-password" onChange={passChange} />
+        <form onSubmit={onFormSubmit}>
+          <TextField id="outlined-required" label="E-mail" variant="outlined" autoComplete="email" onChange={emailChange} />
+          
+          <TextField id="outlined-password-input" label="Heslo" variant="outlined" type="password"
+            autoComplete="current-password" onChange={passChange} />
 
-        <Divider />
+          <Divider />
 
-        <Button variant="contained" onClick={login}>
-          Prihlásiť sa
-        </Button>
+          <Button variant="contained" type='submit'>
+            Prihlásiť sa
+          </Button>
+        </form>
 
         <Button variant="contained" onClick={register}>
           Registerovať sa
