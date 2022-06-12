@@ -46,9 +46,13 @@ class ReservationController extends Controller
     public function getForDateAdmin($date) {
         $reservations = Reservation::whereDate('start', $date)->get();
         $isAdmin = $request->user()->isAdmin();
+
+        $today = new \DateTime('now', new \DateTimeZone('UTC'));
+        $timestampDiff = $today->getTimestamp() - $date->getTimestamp();
+
         $reservations->each(function($reservation) {
             $reservation->user;
-            $reservation->editable = $isAdmin;
+            $reservation->editable = ($timestampDiff < 0) && ($isAdmin);
         });
 
         return response()->json($reservations, 200);
@@ -59,14 +63,22 @@ class ReservationController extends Controller
         $reservations = Reservation::whereDate('start', $date)->get();
         $timezone = $timezone1 . '/' . $timezone2;
 
-        $strippedReservations = $reservations->map(function ($reservation) use ($user, $timezone) {
+        $today = new \DateTime('now', new \DateTimeZone('UTC'));
+        $limitDay = (new \DateTime('now', new \DateTimeZone('UTC')))->add(new \DateInterval('P1D'));
+        $timestampDiff = $today->getTimestamp() - (new \DateTime($date, new \DateTimeZone($timezone)))->getTimestamp();
+        $limitDiff = $today->getTimestamp() - $limitDay->getTimestamp();
+        $sufficientTimeDiff = $timestampDiff < $limitDiff;
+
+        $strippedReservations = $reservations->map(function ($reservation) use ($user, $timezone, $sufficientTimeDiff) {
+            $mine = $reservation->user->id == $user->id;
             return [
                 'id' => $reservation->id,
+                'mine' => $mine,
                 "slot" => $reservation->slot,
                 "start_date" => $reservation->getStartDateForTimezone($timezone),
                 "end_date" => $reservation->getEndDateForTimezone($timezone),
                 "timezone" => $timezone,
-                'editable' => $reservation->user->id == $user->id,
+                'editable' => $sufficientTimeDiff && $mine,
             ];
         });
 
@@ -75,8 +87,8 @@ class ReservationController extends Controller
 
     public function save(Request $request) {
         $user = $request->user();
-
-        if ($user->canMakeReservation()) {
+        error_log($user->isAdmin());
+        if ($user->isAdmin() || $user->canMakeReservation()) {
 
             $input = $request->all();
             $input['user_id'] = $user->id;
@@ -96,7 +108,7 @@ class ReservationController extends Controller
                 return response()->json(['error' => 'Overlapping reservation'], 400);
             }
             
-            if (!$reservation->user->madeReservation()) {
+            if (!$user->isAdmin() && !$reservation->user->madeReservation()) {
                 $reservation->delete();
                 return response()->json(['error' => 'Balance is not sufficient to make a reservation (E3)'], 403);
             }

@@ -49,7 +49,7 @@ const checkEvents = (events, startDate, endDate, slot) => {
 
 function Panel() {
 
-  const [time, setTime] = useState(new moment());
+  const [startTime, setStartTime] = useState(new moment());
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(0);
   const [events, setEvents] = useState([]);
@@ -63,37 +63,28 @@ function Panel() {
       .then((newUser) => {
         setUser(newUser);
         sessionStorage.setItem('user', JSON.stringify(newUser));
-      })
-      .catch((error) => {
-        console.log(error);
       });
 
     SettingsManager.getSettings()
       .then((newSettings) => {
         setSettings(newSettings);
+        console.log(newSettings);
         sessionStorage.setItem('settings', JSON.stringify(newSettings));
-      })
-      .catch((error) => {
-        console.log(error);
       });
 
     ScheduleManager.getForDate(date)
       .then((events) => {
         setEvents(events);
-      })
-      .catch((error) => {
-        console.log(error);
       });
   }, [date, user.balance, settings.price]);
 
   const addEvent = () => {
     let startDate = new Date(date.valueOf());
-    startDate.setHours(time[0].split(':')[0]);
-    startDate.setMinutes(time[0].split(':')[1]);
+    startDate.setHours(startTime.hour());
+    startDate.setMinutes(startTime.minute());
 
-    let endDate = new Date(date.valueOf());
-    endDate.setHours(time[1].split(':')[0]);
-    endDate.setMinutes(time[1].split(':')[1]);
+    let endDate = new Date(startDate.valueOf());
+    endDate.setHours(startDate.getHours() + 1);
 
     if (checkEvents(events, startDate, endDate)) {
       ScheduleManager.save(startDate, endDate, slot)
@@ -146,13 +137,30 @@ function Panel() {
               </FormControl>
 
               <TimePicker
+                disabledHours={() => {
+                  const all = Array.from({length: 25}, (_, i) => i);
+                  const sTime = moment(settings.start_time, 'HH:mm');
+                  const eTime = moment(settings.end_time, 'HH:mm');
+                  const diff = eTime.diff(sTime, 'hours');
+                  const positiveRange = Array.from({length: diff}, (_, i) => i + sTime.hours());
+                  return all.filter(h => !positiveRange.includes(h));
+                }}
+                disabledMinutes={() => {
+                  const all = Array.from({length: 61}, (_, i) => i);
+                  const sTime = moment(settings.start_time, 'HH:mm');
+                  const eTime = moment(settings.end_time, 'HH:mm');
+                  const diff = eTime.diff(sTime, 'minutes');
+                  const positiveRange = Array.from({length: diff}, (_, i) => i + sTime.minutes());
+                  return all.filter(m => !positiveRange.includes(m));
+                }}
+                hideDisabledOptions={true}
                 defaultValue={new Date()}
-                value={time}
+                value={startTime}
                 format={formats.timeGutterFormat}
                 use12Hours={false}
                 showSecond={false}
                 minuteStep={15}
-                onChange={setTime}
+                onChange={setStartTime}
               />
 
               <Button variant="contained" onClick={addEvent}>
@@ -173,8 +181,8 @@ function Panel() {
               defaultView={Views.DAY}
               views={['day']}
               step={30}
-              min={moment('08:00', 'HH:mm').toDate()}
-              max={moment('20:00', 'HH:mm').toDate()}
+              min={moment(settings.start_time, 'HH:mm').toDate()}
+              max={moment(settings.end_time, 'HH:mm').toDate()}
               toolbar={true}
               defaultDate={date}
               date={date}
