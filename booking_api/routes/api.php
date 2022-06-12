@@ -30,7 +30,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('user/reservations', [ReservationController::class, 'getForCurrentUser']);
 
     Route::get('reservation/{id}', [ReservationController::class, 'get']);
-    Route::get('reservation/for-date/{date}', [ReservationController::class, 'getForDate']);
+    Route::get('reservation/for-date/{date}/timezone/{timezone1}/{timezone2}', [ReservationController::class, 'getForDate']);
     Route::post('reservation', [ReservationController::class, 'save']);
     Route::delete('reservation/{id}', [ReservationController::class, 'delete']);
 

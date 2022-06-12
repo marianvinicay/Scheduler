@@ -28,6 +28,7 @@ const AuthManager = {
 
     try {
       const response = await client.post("/register", json);
+      console.log(response.data.user);
       return new User(response.data.user);
 
     } catch (error) {

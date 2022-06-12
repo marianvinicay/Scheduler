@@ -20,7 +20,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Guard policy='user' content={<Navbar content={<UserPanel />} />} />} />
+            <Route path="/dashboard" element={<Guard policy='user' content={<UserPanel />} />} />
             <Route path="/admin" element={<Guard policy='admin' content={<Navbar content={<AdminPanel />} />} />} />
             <Route path="/admin/users" element={<Guard policy='admin' content={<Navbar content={<AdminUsers />} />} />} />
             <Route path="/admin/reservations" element={<Guard policy='admin' content={<Navbar content={<AdminReservations />} />} />} />

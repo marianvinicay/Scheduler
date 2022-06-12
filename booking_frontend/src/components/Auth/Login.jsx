@@ -30,12 +30,14 @@ function Login() {
       .then((user) => {
         SettingsManager.getSettings()
           .then((settings) => {
-            const currentState = { user: user, settings: settings };
+
+            sessionStorage.setItem("user", JSON.stringify(user));
+            sessionStorage.setItem("settings", JSON.stringify(settings));
 
             if (user.policies.includes('admin')) {
-              navigate("/admin", { replace: true, state: currentState });
+              navigate("/admin", { replace: true });
             } else {
-              navigate('/dashboard', { replace: true, state: currentState });
+              navigate('/dashboard', { replace: true });
             }
           })
           .catch((error) => {

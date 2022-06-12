@@ -4,6 +4,8 @@ import axios from 'axios';
 import { DateTime } from 'luxon';
 import Cookies from 'js-cookie';
 
+import SchedulerEvent from '../models/SchedulerEvent';
+
 const apiReservationURL = `http://127.0.0.1:8000/api/reservation`;
 const cookies = Cookies.withAttributes({ path: '/', sameSite: 'strict' }); // add domain...
 
@@ -22,12 +24,6 @@ const getToken = () => {
     } else {
         return "null";
     }
-};
-
-const sqlDateToJSDate = (sqlDateString, timezone) => {
-    return DateTime
-        .fromSQL(sqlDateString, { zone: timezone })
-        .toJSDate();
 };
 
 const ScheduleManager = {
@@ -54,7 +50,8 @@ const ScheduleManager = {
         const month = date.getMonth() + 1;
         const year = date.getFullYear();
         try {
-            const response = await client.get(`/for-date/${year}-${month}-${day}`, {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const response = await client.get(`/for-date/${year}-${month}-${day}/timezone/${timezone}`, {
                 headers: {
                     'Authorization': 'Bearer ' + getToken()
                 }
@@ -63,21 +60,7 @@ const ScheduleManager = {
             const json = response.data;
             var events = [];
             for (var i = 0; i < json.length; i++) {
-                const obj = json[i];
-
-                const timezone = obj.timezone;
-                const sDate = sqlDateToJSDate(obj.start, timezone);
-                const eDate = sqlDateToJSDate(obj.end, timezone);
-
-                const event = {
-                    id: obj.id,
-                    editable: obj.editable,
-                    title: obj.editable ? 'My Session' : 'Booked',
-                    start: sDate,
-                    end: eDate,
-                    resourceId: obj.slot,
-                };
-                events.push(event);
+                events.push(new SchedulerEvent(json[i]));
             }
             return events;
 
@@ -101,18 +84,7 @@ const ScheduleManager = {
             const json = response.data;
             var events = [];
             for (var i = 0; i < json.length; i++) {
-                const obj = json[i];
-                const sDate = sqlDateToJSDate(obj.start);
-                const eDate = sqlDateToJSDate(obj.end);
-
-                const event = {
-                    id: obj.id,
-                    title: obj.user.name,
-                    start: sDate,
-                    end: eDate,
-                    resourceId: obj.slot,
-                };
-                events.push(event);
+                events.push(new SchedulerEvent(json[i]));
             }
             return events;
 
@@ -128,20 +100,19 @@ const ScheduleManager = {
 
         const json = JSON.stringify({
             slot: slot,
-            start: sComps.toFormat('yyyy-LL-dd HH:mm'),
-            end: eComps.toFormat('yyyy-LL-dd HH:mm'),
-            timezone: timezone,
-            //start: `${sComps.year}-${sComps.month}-${sComps.day} ${sComps.hour}:${sComps.minute}:00`,
-            //end: `${eComps.year}-${eComps.month}-${eComps.day} ${eComps.hour}:${eComps.minute}:00`
+            start_date: sComps.toFormat('yyyy-LL-dd HH:mm'),
+            end_date: eComps.toFormat('yyyy-LL-dd HH:mm'),
+            timezone: timezone
         });
-        console.log(json);
+
         try {
             const response = await client.post("/", json, {
                 headers: {
                     'Authorization': 'Bearer ' + getToken()
                 }
             });
-            return response.data;
+
+            return { event: new SchedulerEvent(response.data), user: response.data.user };
 
         } catch (error) {
             throw error.response.data.error;

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from "react-router-dom";
 
 import { Container, Stack, Grid, FormControl, InputLabel, NativeSelect, Button } from '@mui/material';
 import ReservationPopup from '../Admin/ReservationPopup';
 
 import Calendar from 'react-calendar';
-import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+//import TimeRangePicker from '@wojtekmaj/react-timerange-picker';
 import { Calendar as Scheduler, Views, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/sk.js';
@@ -14,8 +15,9 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-big-calendar/lib/sass/styles.scss';
 
 import ScheduleManager from '../../managers/ScheduleManager';
-import AuthManager from '../../managers/AuthManager';
 import SettingsManager from '../../managers/SettingsManager';
+import Navbar from '../Navbar';
+import AuthManager from '../../managers/AuthManager';
 
 moment.locale('sk');
 const localizer = momentLocalizer(moment);
@@ -24,43 +26,65 @@ const formats = {
   timeGutterFormat: 'HH:mm',
 };
 
-const checkEvents = (events, startDate, endDate) => {
-  const eventsOnDate = events.filter((event) => {
-    const start = moment(event.start);
-    const end = moment(event.end);
-    const dateToCheckStart = moment(startDate);
-    const dateToCheckEnd = moment(endDate);
+const datesOverlap = (a_start, a_end, b_start, b_end) => {
+  if (a_start <= b_start && b_start <= a_end) return true; // b starts in a
+  if (a_start <= b_end   && b_end   <= a_end) return true; // b ends in a
+  if (b_start <  a_start && a_end   <  b_end) return true; // a in b
+  return false;
+};
 
-    const startNotClear = dateToCheckStart.isBetween(start, end);
-    const endNotClear = dateToCheckEnd.isBetween(start, end);
-    return startNotClear && endNotClear;
+const checkEvents = (events, startDate, endDate, slot) => {
+  const eventsInTheSlot = events.filter((event) => {
+    return event.slot === slot;
   });
 
-  return eventsOnDate.length === 0;
+  eventsInTheSlot.forEach((event, i) => {
+    if (datesOverlap(event.start, event.end, startDate, endDate)) {
+      return false;
+    }
+  }); 
+
+  return true;
 };
 
 function Panel() {
-  const location = useLocation();
 
-  const [time, setTime] = useState([]);
+  const [time, setTime] = useState(new moment());
   const [date, setDate] = useState(new Date());
   const [slot, setSlot] = useState(0);
   const [events, setEvents] = useState([]);
   const [selectedReservation, setSelectedReservation] = useState(null);
 
+  const [user, setUser] = useState(JSON.parse(sessionStorage.getItem('user')));
+  const [settings, setSettings] = useState(JSON.parse(sessionStorage.getItem('settings')));
+
   useEffect(() => {
-    SettingsManager.getSettings().then((settings) => {
-      location.state.settings = settings;
-    })
+    AuthManager.currentUser()
+      .then((newUser) => {
+        setUser(newUser);
+        sessionStorage.setItem('user', JSON.stringify(newUser));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-    ScheduleManager.getForDate(date).then((events) => {
-      setEvents(events);
-    });
-  }, [location.state, date]);
+    SettingsManager.getSettings()
+      .then((newSettings) => {
+        setSettings(newSettings);
+        sessionStorage.setItem('settings', JSON.stringify(newSettings));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
-  const getSettings = () => {
-    return location.state.settings;
-  };
+    ScheduleManager.getForDate(date)
+      .then((events) => {
+        setEvents(events);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, [date, user.balance, settings.price]);
 
   const addEvent = () => {
     let startDate = new Date(date.valueOf());
@@ -73,20 +97,15 @@ function Panel() {
 
     if (checkEvents(events, startDate, endDate)) {
       ScheduleManager.save(startDate, endDate, slot)
-        .then((newEvent) => {
-          AuthManager.currentUser().then((user) => {
-            location.state.user = user;
-          });
-
-          const calEvent = {
-            id: newEvent.id,
-            title: 'My session',
-            start: startDate,
-            end: endDate,
-            resourceId: slot,
-            editable: true,
-          };
-          setEvents((oldEvents) => [...oldEvents, calEvent]);
+        .then((json) => {
+          console.log(user);
+          console.log(json.user.balance);
+          const newUser = user;
+          newUser.balance = json.user.balance;
+          setUser(newUser);
+          console.log(user);
+          sessionStorage.setItem('user', JSON.stringify(newUser));
+          setEvents((oldEvents) => [...oldEvents, json.event]);
         })
         .catch((error) => {
           console.log(error);
@@ -95,6 +114,7 @@ function Panel() {
   };
 
   return (
+    <Navbar user={user}>
     <Container maxWidth="lg" className="Dashboard">
       <Stack direction="column" spacing={3}>
         <Grid container spacing={3}>
@@ -119,24 +139,27 @@ function Panel() {
                   }}
                   onChange={(p) => setSlot(parseInt(p.target.value))}
                 >
-                  {getSettings().slots.map((value, index) => {
+                  {settings.slots.map((value, index) => {
                     return <option key={index} value={index}>{value}</option>
                   })}
                 </NativeSelect>
               </FormControl>
 
-              <TimeRangePicker
-                onChange={setTime}
+              <TimePicker
+                defaultValue={new Date()}
                 value={time}
-                minTime={'08:00'}
-                maxTime={'20:00'}
-                disableClock={true}
-                format="HH:mm"
+                format={formats.timeGutterFormat}
+                use12Hours={false}
+                showSecond={false}
+                minuteStep={15}
+                onChange={setTime}
               />
 
               <Button variant="contained" onClick={addEvent}>
                 Rezervovať
               </Button>
+
+              <div>Cena: {settings.price}€</div>
             </Stack>
           </Grid>
         </Grid>
@@ -164,8 +187,8 @@ function Panel() {
                   setSelectedReservation(null);
                 }
               }}
-              resources={getSettings().slots.map((value, index) => {
-                return { resourceId: index, resourceTitle: value }
+              resources={settings.slots.map((value, index) => {
+                return { resourceId: (index + 1), resourceTitle: value }
               })}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
@@ -190,6 +213,7 @@ function Panel() {
         }}
       />
     </Container>
+    </Navbar>
   );
 }
 

@@ -45,24 +45,27 @@ class ReservationController extends Controller
 
     public function getForDateAdmin($date) {
         $reservations = Reservation::whereDate('start', $date)->get();
+        $isAdmin = $request->user()->isAdmin();
         $reservations->each(function($reservation) {
             $reservation->user;
+            $reservation->editable = $isAdmin;
         });
 
         return response()->json($reservations, 200);
     }
 
-    public function getForDate(Request $request, $date) {
+    public function getForDate(Request $request, $date, $timezone1, $timezone2) {
         $user = $request->user();
         $reservations = Reservation::whereDate('start', $date)->get();
+        $timezone = $timezone1 . '/' . $timezone2;
 
-        $strippedReservations = $reservations->map(function ($reservation) use ($user) {
+        $strippedReservations = $reservations->map(function ($reservation) use ($user, $timezone) {
             return [
                 'id' => $reservation->id,
                 "slot" => $reservation->slot,
-                "start" => $reservation->start_date,
-                "end" => $reservation->end_date,
-                "timezone" => $reservation->timezone,
+                "start_date" => $reservation->getStartDateForTimezone($timezone),
+                "end_date" => $reservation->getEndDateForTimezone($timezone),
+                "timezone" => $timezone,
                 'editable' => $reservation->user->id == $user->id,
             ];
         });
@@ -74,17 +77,31 @@ class ReservationController extends Controller
         $user = $request->user();
 
         if ($user->canMakeReservation()) {
+
             $input = $request->all();
             $input['user_id'] = $user->id;
             $input['paid'] = true;
 
             $reservation = Reservation::create($input);
+            $reservation->start_date = $input['start_date'];
+            $reservation->end_date = $input['end_date'];
+
+            $doesOverlap = Reservation::where('slot', '=', $reservation->slot)
+                ->whereBetween('start', [$reservation->start, $reservation->end])
+                ->orWhereBetween('end', [$reservation->start, $reservation->end])
+                ->exists();
+
+            if ($doesOverlap) {
+                $reservation->delete();
+                return response()->json(['error' => 'Overlapping reservation'], 400);
+            }
             
             if (!$reservation->user->madeReservation()) {
                 $reservation->delete();
                 return response()->json(['error' => 'Balance is not sufficient to make a reservation (E3)'], 403);
             }
 
+            $reservation->save();
             return response()->json($reservation, 201);
         
         } else {

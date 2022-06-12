@@ -1,25 +1,25 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { Stack, Grid, Button } from '@mui/material';
 
 import AuthManager from '../managers/AuthManager';
 
-function Navbar({ content }) {
+function Navbar(props) {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [userName, setUserName] = useState('');
   const [userBalance, setUserBalance] = useState(0);
   const [policies, setPolicies] = useState([]);
 
   useEffect(() => {
-    if (location.state) {
-      setUserName(location.state.user.name);
-      setUserBalance(location.state.user.balance);
-      setPolicies(location.state.user.policies);
+    const user = props.user;
+    if (user) {
+      setUserName(user.name);
+      setUserBalance(user.balance);
+      setPolicies(user.policies);
     }
-  }, [location]);
+  }, [props.user]);
 
   const logout = () => {
     AuthManager.logout()
@@ -33,7 +33,7 @@ function Navbar({ content }) {
   };
 
   const goBack = () => {
-    navigate('/admin', { state: location.state });
+    navigate('/admin');
   };
 
   let label;
@@ -65,7 +65,7 @@ function Navbar({ content }) {
           </Grid>
         </Grid>
         
-        {content}
+        {props.content ? props.content : props.children}
       </Stack>
     </div>
   );
