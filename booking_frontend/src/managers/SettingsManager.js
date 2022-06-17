@@ -32,7 +32,7 @@ const SettingsUpdater = {
 }
 
 
-const AdminManager = {
+const SettingsManager = {
 
   async getSettings() {
     try {
@@ -42,16 +42,7 @@ const AdminManager = {
         }
       });
 
-      const settings = response.data;
-      if (settings.slots) {
-        settings.slots = JSON.parse(settings.slots);
-      }
-
-      if (settings.exceptDays) {
-        settings.exceptDays = JSON.parse(settings.exceptDays);
-      }
-
-      return settings;
+      return response.data;
 
     } catch (error) {
       throw error;
@@ -63,7 +54,7 @@ const AdminManager = {
     try {
       return await SettingsUpdater.update(json);
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 
@@ -72,10 +63,28 @@ const AdminManager = {
     try {
       return await SettingsUpdater.update(json);
     } catch (error) {
-      console.log(error);
+      throw error;
+    }
+  },
+
+  async setAllowedDurations(newDurations) {
+    const json = JSON.stringify({ durations: newDurations });
+    try {
+      return await SettingsUpdater.update(json);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async setMinimumIncrement(newInc) {
+    const json = JSON.stringify({ minInc: newInc });
+    try {
+      return await SettingsUpdater.update(json);
+    } catch (error) {
+      throw error;
     }
   },
 
 }
 
-export default AdminManager;
+export default SettingsManager;

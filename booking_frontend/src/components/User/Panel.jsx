@@ -16,15 +16,13 @@ import 'react-big-calendar/lib/sass/styles.scss';
 
 import ScheduleManager from '../../managers/ScheduleManager';
 import SettingsManager from '../../managers/SettingsManager';
-import Navbar from '../Navbar';
 import AuthManager from '../../managers/AuthManager';
+import Navbar from '../Navbar';
+import CustomToolbar from '../Calendar/CustomToolbar';
+import Formats from '../Calendar/Formats';
 
 moment.locale('sk');
 const localizer = momentLocalizer(moment);
-
-const formats = {
-  timeGutterFormat: 'HH:mm',
-};
 
 const datesOverlap = (a_start, a_end, b_start, b_end) => {
   if (a_start <= b_start && b_start <= a_end) return true; // b starts in a
@@ -104,10 +102,24 @@ function Panel() {
     }
   };
 
+  const nextDay = () => {
+    const next = new Date(date.valueOf());
+    next.setDate(next.getDate() + 1)
+    setDate(next);
+  };
+
+  const previousDay = () => {
+    const previous = new Date(date.valueOf());
+    console.log(previous);
+    previous.setDate(previous.getDate() - 1)
+    console.log(previous);
+    setDate(previous);
+  };
+
   return (
     <Navbar user={user}>
     <Container maxWidth="lg" className="Dashboard">
-      <Stack direction="column" spacing={3}>
+      <Stack direction='column' spacing={3}>
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Calendar
@@ -156,7 +168,7 @@ function Panel() {
                 hideDisabledOptions={true}
                 defaultValue={new Date()}
                 value={startTime}
-                format={formats.timeGutterFormat}
+                format={Formats.timeGutterFormat}
                 use12Hours={false}
                 showSecond={false}
                 minuteStep={15}
@@ -173,6 +185,7 @@ function Panel() {
         </Grid>
 
         <Grid container spacing={3}>
+          <CustomToolbar date={date} back={previousDay} next={nextDay} />
           <Grid item xs={12}>
             <Scheduler
               culture='sk'
@@ -183,7 +196,7 @@ function Panel() {
               step={30}
               min={moment(settings.start_time, 'HH:mm').toDate()}
               max={moment(settings.end_time, 'HH:mm').toDate()}
-              toolbar={true}
+              toolbar={false}
               defaultDate={date}
               date={date}
               onNavigate={setDate}
@@ -200,7 +213,7 @@ function Panel() {
               })}
               resourceIdAccessor="resourceId"
               resourceTitleAccessor="resourceTitle"
-              formats={formats}
+              formats={Formats}
             />
           </Grid>
         </Grid>

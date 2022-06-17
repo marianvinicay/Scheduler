@@ -14,12 +14,16 @@ class AdminSettings extends Model
     protected $fillable = [
         'price',
         'slots',
+        'minInc',
+        'durations',
 	    'start_time',
 	    'end_time',
         'except_days',
     ];
 
     protected $casts = [
+        'slots' => 'json',
+        'durations' => 'json',
         'except_days' => 'json',
     ];
 

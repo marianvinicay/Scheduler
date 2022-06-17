@@ -32,8 +32,7 @@ function UserRow({ user }) {
 
   return (
     <Stack direction="row" >
-      <a>{user.name}</a>
-      <a>{user.email}</a>
+      <p>{user.name} - {user.email}</p>
       <FormControl>
         <InputLabel id="demo-multiple-checkbox-label">Policy</InputLabel>
         <Select
